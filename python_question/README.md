@@ -37,19 +37,23 @@ docker compose up --build
 
 ## Verify your work
 
-With servers running, open a second terminal and run the test suite:
+With servers running, open a second terminal and run the verification script:
 
 ```bash
-uv run pytest tests/test_verification.py -v
+uv run python scripts/verify.py
 ```
 
-You should see `test_basic_flow` pass. The remaining tests will fail — fixing
-them is your job.
+This sends a few requests to the running server and prints the results so you
+can quickly check what's working.
 
-You can also run the unit tests (no servers needed):
+### Testing
+
+pytest is pre-installed and a stub test file is provided at `tests/test_stub.py`
+to prove the infrastructure works. If you choose to write tests, you can use it
+as a starting point:
 
 ```bash
-uv run pytest tests/test_stub.py -v
+uv run pytest tests/ -v
 ```
 
 ## Architecture
@@ -76,41 +80,15 @@ running but not connected.
 
 ## Tasks
 
-### Task 1: Bug — Quotes Missing for High-Value Policies
+Your tasks are described in the `tickets/` directory. Work through them in any
+order:
 
-When submitting a business with high annual revenue ($5M+), only 1 quote is
-returned instead of 2. Something is going wrong with one of the carrier
-integrations.
-
-**Verify:** `test_task1_high_value_policy` should pass.
-
-### Task 2: Bug — Quotes Missing for High-Limit Requests
-
-When requesting a high coverage limit ($5M), only 1 quote is returned instead
-of 2. A carrier is failing but it's not immediately obvious why.
-
-Read the domain document (`docs/domain.md`) for relevant business rules on how
-to handle this properly.
-
-**Verify:** `test_task2_high_limit_request` should pass.
-
-### Task 3: Feature — Integrate Carrier C (Polling-Based)
-
-Carrier C is running on port 8003 but not integrated. Unlike Carriers A and B,
-it doesn't return quotes immediately — you'll need to figure out its API pattern
-and implement the integration.
-
-**Verify:** `test_task3_polling_carrier` should pass.
-
-### Task 4: Feature — Integrate Carrier D (Unfamiliar API)
-
-Carrier D is running on port 8004 but not integrated. It uses a completely
-different API structure from the other carriers. You'll need to explore its
-endpoints and figure out how to integrate it.
-
-**Hint:** Most APIs have a way to describe themselves.
-
-**Verify:** `test_task4_unfamiliar_carrier` should pass.
+| Ticket | Type | Description |
+|--------|------|-------------|
+| [ticket-1](tickets/ticket-1.md) | Bug | Quotes missing for high-value policies |
+| [ticket-2](tickets/ticket-2.md) | Bug | Quotes missing for high-limit requests |
+| [ticket-3](tickets/ticket-3.md) | Feature | Integrate Carrier C |
+| [ticket-4](tickets/ticket-4.md) | Feature | Integrate Carrier D |
 
 ## Reference
 

@@ -1,4 +1,8 @@
-"""Stub test — verifies the test infrastructure works."""
+"""Stub test file — proves the test infrastructure works.
+
+pytest is pre-installed and configured. You can use this file as a starting
+point for writing your own tests, or create new test files.
+"""
 
 from sayata.models import Quote, Submission
 

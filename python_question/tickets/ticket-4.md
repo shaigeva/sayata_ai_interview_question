@@ -1,0 +1,30 @@
+# Ticket 4: Integrate Carrier D
+
+## Priority: Medium
+
+## Description
+
+Carrier D is another insurance carrier we need to add to the platform. Their
+API server is running on port 8004, but it has not been integrated yet.
+
+Carrier D uses a completely different API structure from our existing carriers —
+different endpoint paths, different field names, different response shapes. We
+don't have detailed documentation for their API, but you should be able to
+figure it out by exploring their service.
+
+## Acceptance Criteria
+
+- When a submission is created, a quote should be requested from Carrier D.
+- Carrier D quotes should appear in the submission's quotes list, normalized
+  to our standard quote format (carrier name, premium, limit, retention,
+  quote ID).
+- The integration should follow the existing carrier client pattern
+  (see `src/sayata/carriers/base.py`).
+- Carrier D should be registered in the server alongside the existing carriers.
+
+## Technical Notes
+
+- Carrier D is running on `http://localhost:8004`.
+- Their API uses different terminology and endpoint structure from our other
+  carriers.
+- Hint: Most APIs have a way to describe themselves.

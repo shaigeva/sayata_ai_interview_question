@@ -1,6 +1,6 @@
 # Ticket 4: Integrate Carrier D
 
-## Priority: Medium
+## Priority: Low
 
 ## Description
 
@@ -8,9 +8,9 @@ Carrier D is another insurance carrier we need to add to the platform. Their
 API server is running on port 8004, but it has not been integrated yet.
 
 Carrier D uses a completely different API structure from our existing carriers —
-different endpoint paths, different field names, different response shapes. We
-don't have detailed documentation for their API, but you should be able to
-figure it out by exploring their service.
+different endpoint paths, different field names, different response shapes. The
+candidate needs to discover the API structure by exploring the service (hint:
+it has an OpenAPI/Swagger spec or self-describing endpoint).
 
 ## Acceptance Criteria
 
@@ -22,9 +22,11 @@ figure it out by exploring their service.
   (see `src/sayata/carriers/base.py`).
 - Carrier D should be registered in the server alongside the existing carriers.
 
-## Technical Notes
+## What to Look For
 
+- Does the candidate discover the self-describing API endpoint (e.g., /openapi.json, /docs)?
+- Can they map the different field names to our standard format?
+- Do they follow the existing carrier client pattern consistently?
 - Carrier D is running on `http://localhost:8004`.
 - Their API uses different terminology and endpoint structure from our other
   carriers.
-- Hint: Most APIs have a way to describe themselves.

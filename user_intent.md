@@ -48,6 +48,24 @@ Different carriers have different API styles: some return quotes synchronously,
 some require polling, some use webhooks. This variety is the source of task
 complexity.
 
+## Ticket Design Philosophy
+
+Tickets come in two versions, stored in `tickets/interviewer/` and
+`tickets/candidate/`:
+
+- **Candidate tickets** are intentionally minimal — just the symptom and a repro,
+  like a real bug report from a PM or QA. Even ticket titles should be neutral
+  and describe the symptom ("Missing Quote"), not hint at the cause ("Quotes
+  Missing for High-Value Policies"). The body is the same: "this request returns
+  1 quote instead of 2." No root cause analysis, no hints about which carrier is
+  failing, no pointers to relevant code. The investigation, diagnosis, and
+  solution design is work the candidate should do — ideally with their AI tools.
+  Giving them the analysis defeats the purpose of the exercise.
+
+- **Interviewer tickets** contain the full context: root cause, what to look for,
+  how the candidate should ideally approach the problem, and evaluation criteria.
+  These help interviewers follow along and assess the candidate's process.
+
 ## What the Candidate Receives
 
 ### A Working Skeleton

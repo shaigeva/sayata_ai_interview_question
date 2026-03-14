@@ -8,6 +8,11 @@ We've received reports that when a business with high annual revenue submits
 for a quote, we're only returning one quote instead of two. Both Carrier A and
 Carrier B should be returning quotes for every valid submission.
 
+The root cause is in the Carrier B client — it has a bug where it fails to
+generate quotes when the annual revenue exceeds a certain threshold. The
+candidate needs to trace the request flow, identify the failing carrier, and
+fix the issue.
+
 ## Steps to Reproduce
 
 1. Submit a business with high annual revenue (e.g. $5M+):
@@ -34,8 +39,12 @@ Carrier B should be returning quotes for every valid submission.
 Both Carrier A and Carrier B should return quotes for this submission. The
 submission should have 2 quotes.
 
-## Notes
+## What to Look For
 
+- Can the candidate identify which carrier is failing to return a quote?
+- Do they look at the carrier client code to understand the flow?
+- Do they debug systematically (logs, stepping through code, testing with
+  different inputs)?
 - This works fine for lower revenue businesses (e.g. $500K annual revenue).
-- The issue seems specific to higher-value policies.
-- No errors are visible in the server logs.
+- The issue is specific to higher-value policies.
+- No errors are visible in the server logs — the failure is silent.

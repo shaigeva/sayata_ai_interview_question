@@ -85,14 +85,17 @@ order:
 
 | Ticket | Type | Description |
 |--------|------|-------------|
-| [ticket-1](tickets/ticket-1.md) | Bug | Quotes missing for high-value policies |
-| [ticket-2](tickets/ticket-2.md) | Bug | Quotes missing for high-limit requests |
-| [ticket-3](tickets/ticket-3.md) | Feature | Integrate Carrier C |
-| [ticket-4](tickets/ticket-4.md) | Feature | Integrate Carrier D |
+| [ticket-1](tickets/candidate/ticket-1.md) | Bug | Quotes missing for high-value policies |
+| [ticket-2](tickets/candidate/ticket-2.md) | Bug | Quotes missing for high-limit requests |
+| [ticket-3](tickets/candidate/ticket-3.md) | Feature | Integrate Carrier C |
+| [ticket-4](tickets/candidate/ticket-4.md) | Feature | Integrate Carrier D |
 
 ## Reference
 
-- Domain document with business rules: `docs/domain.md`
+- Platform architecture: `docs/architecture.md`
+- Business rules & principles: `docs/business-rules.md`
+- Insurance glossary: `docs/glossary.md`
+- UX & frontend reference: `docs/frontend-guidelines.md`
 - Carrier client interface: `src/sayata/carriers/base.py`
 - Existing carrier clients: `src/sayata/carriers/carrier_a.py`, `carrier_b.py`
 
@@ -102,3 +105,11 @@ order:
 - You can ask the interviewers questions at any time.
 - Tasks are independent — you can work on them in any order or in parallel.
 - You're not expected to finish everything. Do what you can.
+
+## After the Interview
+
+If asked to submit your solution:
+
+```bash
+zip -r solution.zip . -x '.venv/*' '__pycache__/*' 'packages/*'
+```

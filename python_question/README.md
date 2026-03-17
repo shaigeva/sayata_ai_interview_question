@@ -11,7 +11,7 @@ carrier integrations.
 
 ### Prerequisites
 
-- Python 3.12+
+- Python 3.12 (exactly — not 3.13+)
 - [uv](https://docs.astral.sh/uv/) (Python package manager)
 
 ### Install dependencies

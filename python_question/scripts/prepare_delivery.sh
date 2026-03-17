@@ -13,7 +13,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 DELIVERY_DIR="$PROJECT_DIR/delivery"
-WHEEL="sayata_simulators-1.0.0-py3-none-any.whl"
+WHEEL="sayata_simulators-1.0.0-cp312-none-any.whl"
 
 echo "=== Preparing delivery artifacts ==="
 echo ""
@@ -45,8 +45,14 @@ using the instructions below.
 
 ## Prerequisites
 
-- **Python 3.12+**
+- **Python 3.12** (exactly — not 3.13+)
 - **[uv](https://docs.astral.sh/uv/)** (Python package manager)
+
+If you don't have Python 3.12 installed, uv can fetch it for you:
+
+```bash
+uv python install 3.12
+```
 
 ## Setup
 
@@ -54,11 +60,24 @@ using the instructions below.
 # Install dependencies
 uv sync
 
-# Verify everything works
-uv run pytest
+# Run tests to verify
+uv run pytest -v
 ```
 
-Both commands should complete without errors.
+You should see all tests pass, including a server health check.
+
+## Verify server runs
+
+```bash
+# Start the stub server
+uv run uvicorn sayata.server:app --port 8000 &
+
+# Check it responds
+curl http://localhost:8000/health
+
+# Stop it
+kill %1
+```
 
 ## AI Tools
 
@@ -70,8 +89,8 @@ before the interview.
 
 During the interview you'll receive exercise materials (a zip file) that
 add tasks, documentation, and servers to this project. No exercise content
-is included in this setup repo — this is just to ensure your environment is
-ready.
+is included in this setup repo — this is just to ensure your environment
+is ready.
 SKEL_README
 
 # pyproject.toml (same deps, no simulator references)
@@ -80,7 +99,7 @@ cat > "$SKEL/pyproject.toml" <<'SKEL_TOML'
 name = "sayata-interview"
 version = "0.1.0"
 description = "Sayata quoting platform — interview exercise"
-requires-python = ">=3.12"
+requires-python = "==3.12.*"
 dependencies = [
     "fastapi>=0.115",
     "uvicorn>=0.34",
@@ -101,9 +120,26 @@ packages = ["src/sayata"]
 testpaths = ["tests"]
 SKEL_TOML
 
-# Minimal package structure
+# Stub server — minimal FastAPI app with a health endpoint
 mkdir -p "$SKEL/src/sayata"
 touch "$SKEL/src/sayata/__init__.py"
+
+cat > "$SKEL/src/sayata/server.py" <<'SKEL_SERVER'
+"""Sayata quoting platform — stub server.
+
+This is a placeholder that verifies your environment can run a FastAPI server.
+It will be replaced with the full implementation during the interview.
+"""
+
+from fastapi import FastAPI
+
+app = FastAPI(title="Sayata Quoting Platform")
+
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+SKEL_SERVER
 
 # about.md
 mkdir -p "$SKEL/docs"
@@ -118,26 +154,30 @@ all parties involved.
 The interview exercise simulates a simplified version of our quoting platform.
 SKEL_ABOUT
 
-# test_setup.py
+# test_setup.py — import checks + server health check via TestClient
 mkdir -p "$SKEL/tests"
 cat > "$SKEL/tests/test_setup.py" <<'SKEL_TEST'
 """Setup verification — proves the environment is working."""
 
+from fastapi.testclient import TestClient
+
+from sayata.server import app
+
 
 def test_imports():
-    """Verify the package is importable."""
-    import sayata  # noqa: F401
-    assert True
-
-
-def test_dependencies():
     """Verify key dependencies are installed."""
-    import fastapi  # noqa: F401
     import httpx  # noqa: F401
     import pydantic  # noqa: F401
     import requests  # noqa: F401
     import uvicorn  # noqa: F401
-    assert True
+
+
+def test_server_health():
+    """Verify the server starts and responds."""
+    client = TestClient(app)
+    resp = client.get("/health")
+    assert resp.status_code == 200
+    assert resp.json() == {"status": "ok"}
 SKEL_TEST
 
 # .gitignore
@@ -167,8 +207,36 @@ STAGE="$DELIVERY_DIR/_exercise_staging"
 # README (full instructions — replaces skeleton README)
 cp "$PROJECT_DIR/README.md" "$STAGE/README.md"
 
-# pyproject.toml (same as skeleton)
-cp "$SKEL/pyproject.toml" "$STAGE/pyproject.toml"
+# pyproject.toml (adds sayata-simulators dependency + find-links)
+cat > "$STAGE/pyproject.toml" <<'EXERCISE_TOML'
+[project]
+name = "sayata-interview"
+version = "0.1.0"
+description = "Sayata quoting platform — interview exercise"
+requires-python = "==3.12.*"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn>=0.34",
+    "httpx>=0.28",
+    "pydantic>=2.10",
+    "pytest>=8.3",
+    "requests>=2.32",
+    "sayata-simulators==1.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sayata"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.uv]
+find-links = ["packages"]
+EXERCISE_TOML
 
 # Source code (candidate's server + carriers — NO simulators)
 mkdir -p "$STAGE/src/sayata/carriers"
@@ -234,7 +302,7 @@ echo "  delivery/skeleton/     → Push to candidate-facing repo"
 echo "  delivery/exercise.zip  → Share during interview"
 echo ""
 echo "Verification:"
-echo "  1. cd to a fresh dir, copy skeleton/, run: uv sync && uv run pytest"
+echo "  1. cd to a fresh dir, copy skeleton/, run: uv sync && uv run pytest -v"
 echo "  2. Extract exercise.zip into it, run: bash setup.sh"
 echo "  3. Start servers: uv run python scripts/start.py"
 echo "  4. Verify: uv run python scripts/verify.py"

@@ -3,7 +3,6 @@
 set -euo pipefail
 
 echo "Installing exercise dependencies..."
-uv pip install packages/*.whl
 uv sync
 echo ""
 echo "Ready! Start the servers with:"

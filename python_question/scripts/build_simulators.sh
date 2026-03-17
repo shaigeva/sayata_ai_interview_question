@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 # Build the sayata_simulators wheel with .pyc-only (no source).
 #
-# Compiles all simulator .py files to .pyc bytecode, packages them
-# as a wheel, and outputs to packages/. Candidates receive only the
-# wheel — they cannot read simulator source.
+# Compiles all simulator .py files to .pyc bytecode using Python 3.12,
+# packages them as a wheel, and outputs to packages/. Candidates receive
+# only the wheel — they cannot read simulator source.
+#
+# Requires: uv (to fetch/run Python 3.12)
 
 set -euo pipefail
 
@@ -12,9 +14,10 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 BUILD_DIR="$(mktemp -d)"
 PKG_NAME="sayata_simulators"
 VERSION="1.0.0"
+PY_VERSION="3.12"
 SIM_DIR="$PROJECT_DIR/src/sayata/simulators"
 
-echo "Building $PKG_NAME-$VERSION wheel..."
+echo "Building $PKG_NAME-$VERSION wheel (Python $PY_VERSION)..."
 echo "  Source:    $SIM_DIR"
 echo "  Build dir: $BUILD_DIR"
 
@@ -27,8 +30,8 @@ for f in __init__.py carrier_a_sim.py carrier_b_sim.py carrier_c_sim.py carrier_
     cp "$SIM_DIR/$f" "$PKG_DIR/$f"
 done
 
-# Compile to .pyc (legacy locations: .pyc next to .py)
-python3 -m compileall -b -q "$PKG_DIR"
+# Compile to .pyc using Python 3.12 (legacy locations: .pyc next to .py)
+uv run --python "$PY_VERSION" python -m compileall -b -q "$PKG_DIR"
 
 # Remove .py source — keep only .pyc
 find "$PKG_DIR" -name "*.py" -delete
@@ -44,7 +47,7 @@ Metadata-Version: 2.1
 Name: $PKG_NAME
 Version: $VERSION
 Summary: Carrier simulators for Sayata interview exercise
-Requires-Python: >=3.12
+Requires-Python: ==$PY_VERSION.*
 Requires-Dist: fastapi>=0.115
 Requires-Dist: uvicorn>=0.34
 EOF
@@ -53,7 +56,7 @@ cat > "$DIST_INFO/WHEEL" <<EOF
 Wheel-Version: 1.0
 Generator: build_simulators.sh
 Root-Is-Purelib: true
-Tag: py3-none-any
+Tag: cp312-none-any
 EOF
 
 cat > "$DIST_INFO/top_level.txt" <<EOF
@@ -62,7 +65,7 @@ EOF
 
 # Generate RECORD with sha256 hashes
 cd "$BUILD_DIR"
-python3 -c "
+uv run --python "$PY_VERSION" python -c "
 import hashlib, base64, os
 
 records = []
@@ -81,7 +84,7 @@ print('\n'.join(records))
 " > "$DIST_INFO/RECORD"
 
 # Package as wheel (.whl = zip with specific naming)
-WHEEL_FILE="$PKG_NAME-$VERSION-py3-none-any.whl"
+WHEEL_FILE="$PKG_NAME-$VERSION-cp312-none-any.whl"
 mkdir -p "$PROJECT_DIR/packages"
 zip -q -r "$PROJECT_DIR/packages/$WHEEL_FILE" .
 

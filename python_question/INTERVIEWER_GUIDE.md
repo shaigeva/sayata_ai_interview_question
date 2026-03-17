@@ -35,7 +35,8 @@ Completing all 4 is not expected. 2–3 tasks in 60–90 minutes is a strong res
    - Clone the repo
    - Run `uv sync` and `uv run pytest` to verify their environment
    - Set up their preferred AI tools (Cursor, Copilot, Claude Code, etc.)
-3. Confirm they have Python 3.12+ and [uv](https://docs.astral.sh/uv/) installed
+3. Confirm they have Python 3.12 (exactly — not 3.13+) and [uv](https://docs.astral.sh/uv/) installed.
+   If they don't have 3.12: `uv python install 3.12`
 
 **Before the call:**
 
@@ -257,7 +258,8 @@ A: Verify Python 3.12+ is installed. Run `python3 --version`. If using pyenv,
 ensure the correct version is active.
 
 **Q: `setup.sh` fails with "No matching distribution."**
-A: The wheel requires Python 3.12+. Check the candidate's Python version.
+A: The wheel contains .pyc compiled for Python 3.12. Check the candidate is
+using exactly 3.12 (`python3 --version`). Run `uv python install 3.12` if needed.
 
 **Q: Servers won't start (port already in use).**
 A: Kill existing processes: `lsof -i :8000-8004 | grep LISTEN` then

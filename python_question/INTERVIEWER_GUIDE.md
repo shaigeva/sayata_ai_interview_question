@@ -221,20 +221,132 @@ breadcrumb.
 
 ---
 
-## 6. Verification
+## 6. Testing & Verification
 
-After the candidate finishes (or time runs out), run the verification test
-suite from this repo against the candidate's running servers:
+The exercise has three testing layers, each serving a different audience and
+purpose. Only the first two are visible to candidates.
+
+### Layer 1: Candidate unit tests (`tests/test_stub.py`)
+
+**Audience:** Candidate
+**Requires:** Nothing running — pure unit tests
+
+```bash
+uv run pytest tests/ -v
+```
+
+Shipped in the exercise zip. Two tests that prove the test infrastructure works
+by instantiating Pydantic models (`Submission`, `Quote`). These always pass.
+Candidates can extend this file or create new test files.
+
+### Layer 2: Candidate verification script (`scripts/verify.py`)
+
+**Audience:** Candidate
+**Requires:** All servers running (`uv run python scripts/start.py`)
+
+```bash
+uv run python scripts/verify.py
+```
+
+A non-pytest script that sends real HTTP requests to the running servers and
+prints human-readable results. It runs three scenarios:
+
+1. **Low-revenue submission** ($500K) — should return 2 quotes (baseline)
+2. **High-revenue submission** ($5M) — tests Ticket 1 (Carrier B comma bug)
+3. **High-limit submission** ($5M limit) — tests Ticket 2 (Carrier A fallback)
+
+Also pings all four carrier simulators to confirm they're running. This gives
+candidates quick visual feedback without needing to write tests.
+
+### Layer 3: Interviewer test suite (`tests/interviewer/test_verification.py`)
+
+**Audience:** Interviewer only (never shipped to candidates)
+**Requires:** All servers running, candidate's code in place
 
 ```bash
 uv run pytest tests/interviewer/test_verification.py -v
 ```
 
-This tests all tasks end-to-end. The test names indicate which ticket they
-verify (e.g. `test_ticket1_*`, `test_ticket2_*`, etc.).
+Full pytest suite with 14 tests covering every task. Run this from **this
+repo** (not the candidate's repo) against the candidate's running servers on
+localhost:8000. The tests hit the same server the candidate is running.
 
-Baseline tests (`test_basic_flow`, `test_low_revenue_both_carriers`) should
-pass even with the unmodified skeleton.
+#### Test breakdown by ticket
+
+| Test | Ticket | What it verifies |
+|------|--------|-----------------|
+| `test_basic_flow` | Baseline | Low-revenue submit → 2 quotes → bind |
+| `test_submission_not_found` | Baseline | 404 for nonexistent submission |
+| `test_low_revenue_both_carriers` | Baseline | Both A and B return quotes |
+| `test_ticket1_high_value_policy` | 1 | $5M revenue → quotes from both A and B |
+| `test_ticket1_premium_is_numeric` | 1 | Carrier B premium is a number, not string |
+| `test_ticket2_high_limit_request` | 2 | $5M limit → quotes from both A and B |
+| `test_ticket2_uses_closest_limit` | 2 | Carrier A falls back to closest limit (3M for 5M) |
+| `test_ticket2_unsupported_retention` | 2 | Carrier A falls back to closest retention |
+| `test_ticket3_carrier_c_present` | 3 | Carrier C quote appears (after polling delay) |
+| `test_ticket3_carrier_c_quote_fields` | 3 | Carrier C quote has all standard fields |
+| `test_ticket4_carrier_d_present` | 4 | Carrier D quote appears |
+| `test_ticket4_carrier_d_quote_normalized` | 4 | Carrier D quote normalized to standard format |
+| `test_ticket4_carrier_d_bind` | 4 | Carrier D quote can be bound |
+| `test_all_carriers_combined` | All | Standard submission returns all 4 carriers |
+
+The baseline tests should pass with the unmodified skeleton. Ticket-specific
+tests fail until the candidate fixes/implements that task.
+
+Tests for tickets 3 and 4 include `time.sleep()` calls (up to 10 seconds) to
+wait for async polling to complete. The full suite takes ~35 seconds to run.
+
+#### Running a subset
+
+To check a specific ticket:
+
+```bash
+uv run pytest tests/interviewer/test_verification.py -v -k "ticket1"
+uv run pytest tests/interviewer/test_verification.py -v -k "ticket2"
+uv run pytest tests/interviewer/test_verification.py -v -k "ticket3"
+uv run pytest tests/interviewer/test_verification.py -v -k "ticket4"
+```
+
+### Pre-interview: testing the delivery artifacts
+
+Before the interview, verify that the full delivery pipeline works end-to-end.
+Run `scripts/prepare_delivery.sh`, then simulate the candidate flow in a temp
+directory:
+
+```bash
+# 1. Build delivery artifacts
+bash scripts/prepare_delivery.sh
+
+# 2. Simulate skeleton setup
+cd /tmp && rm -rf test_interview
+cp -r /path/to/delivery/skeleton test_interview
+cd test_interview
+uv sync
+uv run pytest -v          # 2 tests: imports + server health check
+
+# 3. Simulate exercise delivery
+unzip /path/to/delivery/exercise.zip
+bash setup.sh
+
+# 4. Start servers and verify
+uv run python scripts/start.py &
+sleep 3
+uv run python scripts/verify.py
+
+# 5. Confirm no simulator source is visible
+find . -name "*.py" -path "*/simulators/*"   # should find nothing
+
+# 6. Confirm no interviewer content leaked
+find . -name "test_verification*"            # should find nothing
+find . -path "*/interviewer/*"               # should find nothing
+
+# 7. Clean up
+kill %1
+```
+
+The skeleton's `test_setup.py` uses FastAPI's `TestClient` to hit a `/health`
+endpoint on a stub server. This stub is replaced by the real server when the
+exercise zip is extracted — no conflict, just an overwrite.
 
 ---
 

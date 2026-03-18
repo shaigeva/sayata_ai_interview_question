@@ -9,7 +9,8 @@
       "Bash(python3.12:*)",
       "Bash(rm:*)",
       "Bash(uv run:*)",
-      "Bash(uv:*)"
+      "Bash(uv:*)",
+      "Bash(rm Dockerfile:*)"
     ]
   }
 }

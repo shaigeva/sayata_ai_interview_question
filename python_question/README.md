@@ -7,6 +7,13 @@ insurance carriers, and lets users accept (bind) a quote.
 A working skeleton is already in place — your job is to fix bugs and add new
 carrier integrations.
 
+## Important info
+
+- You're expected to use AI tooling (Cursor, Copilot, Claude Code, etc.).
+- You can ask the interviewers questions at any time.
+- Tasks are independent — you can work on them in any order or in parallel.
+- Finishing all tasks is a plus, but it's not the only evaluation criterion. Do what you can.
+
 ## Setup
 
 ### Prerequisites
@@ -92,13 +99,6 @@ order:
 - UX & frontend reference: `docs/frontend-guidelines.md`
 - Carrier client interface: `src/sayata/carriers/base.py`
 - Existing carrier clients: `src/sayata/carriers/carrier_a.py`, `carrier_b.py`
-
-## Notes
-
-- You're expected to use AI tooling (Cursor, Copilot, Claude Code, etc.).
-- You can ask the interviewers questions at any time.
-- Tasks are independent — you can work on them in any order or in parallel.
-- You're not expected to finish everything. Do what you can.
 
 ## After the Interview
 

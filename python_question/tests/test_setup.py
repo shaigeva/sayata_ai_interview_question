@@ -2,7 +2,7 @@
 
 from fastapi.testclient import TestClient
 
-from sayata.server_stub import app
+from sayata.server_stub import HealthResponse, app
 
 
 def test_imports():
@@ -14,8 +14,12 @@ def test_imports():
 
 
 def test_server_health():
-    """Verify the server starts and responds."""
+    """Verify the server starts and responds with a Pydantic model."""
     client = TestClient(app)
     resp = client.get("/health")
     assert resp.status_code == 200
-    assert resp.json() == {"status": "ok"}
+    data = resp.json()
+    assert data == {"status": "ok", "service": "sayata"}
+    # Verify the response parses as the Pydantic model
+    health = HealthResponse(**data)
+    assert health.status == "ok"

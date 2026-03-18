@@ -29,12 +29,6 @@ This starts the candidate server (port 8000) and four carrier simulators
 uv run python scripts/start.py
 ```
 
-### Alternative: Docker
-
-```bash
-docker compose up --build
-```
-
 ## Verify your work
 
 With servers running, open a second terminal and run the verification script:

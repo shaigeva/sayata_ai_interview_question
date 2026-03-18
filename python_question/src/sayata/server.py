@@ -18,6 +18,12 @@ from sayata.models import (
 
 app = FastAPI(title="Sayata Quoting Platform")
 
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
+
 # In-memory state
 submissions: dict[str, Submission] = {}
 submission_quotes: dict[str, list[Quote]] = {}

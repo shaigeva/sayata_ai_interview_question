@@ -5,7 +5,8 @@
 #   delivery/skeleton/     — minimal setup repo (pre-interview)
 #   delivery/exercise.zip  — exercise materials (during interview)
 #
-# Skeleton source files live in skeleton/ and can be edited directly.
+# Skeleton source files live alongside the real files with _PREP / _stub
+# suffixes (e.g. README_PREP.md, server_stub.py, test_setup.py, about.md).
 # The exercise README is the repo's README.md.
 #
 # Usage:
@@ -39,17 +40,17 @@ echo "--- Building skeleton repo ---"
 
 SKEL="$DELIVERY_DIR/skeleton"
 
-# Copy skeleton source files
-cp "$PROJECT_DIR/skeleton/README.md" "$SKEL/README.md"
+# Copy skeleton source files (renamed to their delivery names)
+cp "$PROJECT_DIR/README_PREP.md" "$SKEL/README.md"
 mkdir -p "$SKEL/docs"
-cp "$PROJECT_DIR/skeleton/docs/about.md" "$SKEL/docs/about.md"
+cp "$PROJECT_DIR/docs/about.md" "$SKEL/docs/about.md"
 
 mkdir -p "$SKEL/src/sayata"
 touch "$SKEL/src/sayata/__init__.py"
-cp "$PROJECT_DIR/skeleton/src/sayata/server.py" "$SKEL/src/sayata/server.py"
+cp "$PROJECT_DIR/src/sayata/server_stub.py" "$SKEL/src/sayata/server.py"
 
 mkdir -p "$SKEL/tests"
-cp "$PROJECT_DIR/skeleton/tests/test_setup.py" "$SKEL/tests/test_setup.py"
+cp "$PROJECT_DIR/tests/test_setup.py" "$SKEL/tests/test_setup.py"
 
 # pyproject.toml (skeleton: no simulator dependency)
 cat > "$SKEL/pyproject.toml" <<'SKEL_TOML'

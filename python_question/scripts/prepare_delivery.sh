@@ -5,6 +5,9 @@
 #   delivery/skeleton/     — minimal setup repo (pre-interview)
 #   delivery/exercise.zip  — exercise materials (during interview)
 #
+# Skeleton source files live in skeleton/ and can be edited directly.
+# The exercise README is the repo's README.md.
+#
 # Usage:
 #   bash scripts/prepare_delivery.sh
 
@@ -36,64 +39,19 @@ echo "--- Building skeleton repo ---"
 
 SKEL="$DELIVERY_DIR/skeleton"
 
-# README
-cat > "$SKEL/README.md" <<'SKEL_README'
-# Sayata Interview Exercise — Environment Setup
+# Copy skeleton source files
+cp "$PROJECT_DIR/skeleton/README.md" "$SKEL/README.md"
+mkdir -p "$SKEL/docs"
+cp "$PROJECT_DIR/skeleton/docs/about.md" "$SKEL/docs/about.md"
 
-Welcome! Before the interview, please set up your development environment
-using the instructions below.
+mkdir -p "$SKEL/src/sayata"
+touch "$SKEL/src/sayata/__init__.py"
+cp "$PROJECT_DIR/skeleton/src/sayata/server.py" "$SKEL/src/sayata/server.py"
 
-## Prerequisites
+mkdir -p "$SKEL/tests"
+cp "$PROJECT_DIR/skeleton/tests/test_setup.py" "$SKEL/tests/test_setup.py"
 
-- **Python 3.12** (exactly — not 3.13+)
-- **[uv](https://docs.astral.sh/uv/)** (Python package manager)
-
-If you don't have Python 3.12 installed, uv can fetch it for you:
-
-```bash
-uv python install 3.12
-```
-
-## Setup
-
-```bash
-# Install dependencies
-uv sync
-
-# Run tests to verify
-uv run pytest -v
-```
-
-You should see all tests pass, including a server health check.
-
-## Verify server runs
-
-```bash
-# Start the stub server
-uv run uvicorn sayata.server:app --port 8000 &
-
-# Check it responds
-curl http://localhost:8000/health
-
-# Stop it
-kill %1
-```
-
-## AI Tools
-
-You're expected to use AI tooling during the interview (Cursor, Copilot,
-Claude Code, etc.). Please set up your preferred AI tools in this project
-before the interview.
-
-## What to Expect
-
-During the interview you'll receive exercise materials (a zip file) that
-add tasks, documentation, and servers to this project. No exercise content
-is included in this setup repo — this is just to ensure your environment
-is ready.
-SKEL_README
-
-# pyproject.toml (same deps, no simulator references)
+# pyproject.toml (skeleton: no simulator dependency)
 cat > "$SKEL/pyproject.toml" <<'SKEL_TOML'
 [project]
 name = "sayata-interview"
@@ -119,66 +77,6 @@ packages = ["src/sayata"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 SKEL_TOML
-
-# Stub server — minimal FastAPI app with a health endpoint
-mkdir -p "$SKEL/src/sayata"
-touch "$SKEL/src/sayata/__init__.py"
-
-cat > "$SKEL/src/sayata/server.py" <<'SKEL_SERVER'
-"""Sayata quoting platform — stub server.
-
-This is a placeholder that verifies your environment can run a FastAPI server.
-It will be replaced with the full implementation during the interview.
-"""
-
-from fastapi import FastAPI
-
-app = FastAPI(title="Sayata Quoting Platform")
-
-
-@app.get("/health")
-async def health():
-    return {"status": "ok"}
-SKEL_SERVER
-
-# about.md
-mkdir -p "$SKEL/docs"
-cat > "$SKEL/docs/about.md" <<'SKEL_ABOUT'
-# About Sayata
-
-Sayata is a leading insurance marketplace that connects businesses with
-insurance carriers. Our platform streamlines the quoting and binding process
-for commercial insurance policies, making it faster and more transparent for
-all parties involved.
-
-The interview exercise simulates a simplified version of our quoting platform.
-SKEL_ABOUT
-
-# test_setup.py — import checks + server health check via TestClient
-mkdir -p "$SKEL/tests"
-cat > "$SKEL/tests/test_setup.py" <<'SKEL_TEST'
-"""Setup verification — proves the environment is working."""
-
-from fastapi.testclient import TestClient
-
-from sayata.server import app
-
-
-def test_imports():
-    """Verify key dependencies are installed."""
-    import httpx  # noqa: F401
-    import pydantic  # noqa: F401
-    import requests  # noqa: F401
-    import uvicorn  # noqa: F401
-
-
-def test_server_health():
-    """Verify the server starts and responds."""
-    client = TestClient(app)
-    resp = client.get("/health")
-    assert resp.status_code == 200
-    assert resp.json() == {"status": "ok"}
-SKEL_TEST
 
 # .gitignore
 cat > "$SKEL/.gitignore" <<'SKEL_IGNORE'
@@ -206,6 +104,8 @@ STAGE="$DELIVERY_DIR/_exercise_staging"
 
 # README (full instructions — replaces skeleton README)
 cp "$PROJECT_DIR/README.md" "$STAGE/README.md"
+# Fix ticket links for exercise layout (tickets/ticket-N.md, not tickets/candidate/...)
+sed -i '' 's|tickets/candidate/ticket-|tickets/ticket-|g' "$STAGE/README.md"
 
 # pyproject.toml (adds sayata-simulators dependency + find-links)
 cat > "$STAGE/pyproject.toml" <<'EXERCISE_TOML'
@@ -278,10 +178,6 @@ mkdir -p "$STAGE/tests"
 cp "$PROJECT_DIR/tests/__init__.py" "$STAGE/tests/__init__.py"
 cp "$PROJECT_DIR/tests/conftest.py" "$STAGE/tests/conftest.py"
 cp "$PROJECT_DIR/tests/test_stub.py" "$STAGE/tests/test_stub.py"
-
-# Fix ticket links in exercise README — tickets are at tickets/ticket-N.md in the zip
-# (not tickets/candidate/ticket-N.md like in this repo)
-sed -i '' 's|tickets/candidate/ticket-|tickets/ticket-|g' "$STAGE/README.md"
 
 # Build the zip
 cd "$STAGE"

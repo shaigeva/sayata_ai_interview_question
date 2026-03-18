@@ -40,14 +40,15 @@ echo "--- Building skeleton repo ---"
 
 SKEL="$DELIVERY_DIR/skeleton"
 
-# Copy skeleton source files (renamed to their delivery names)
-cp "$PROJECT_DIR/README_PREP.md" "$SKEL/README.md"
+# Copy skeleton source files (same names — no renaming)
+cp "$PROJECT_DIR/README_PREP.md" "$SKEL/README_PREP.md"
+
 mkdir -p "$SKEL/docs"
 cp "$PROJECT_DIR/docs/about.md" "$SKEL/docs/about.md"
 
 mkdir -p "$SKEL/src/sayata"
 touch "$SKEL/src/sayata/__init__.py"
-cp "$PROJECT_DIR/src/sayata/server_stub.py" "$SKEL/src/sayata/server.py"
+cp "$PROJECT_DIR/src/sayata/server_stub.py" "$SKEL/src/sayata/server_stub.py"
 
 mkdir -p "$SKEL/tests"
 cp "$PROJECT_DIR/tests/test_setup.py" "$SKEL/tests/test_setup.py"

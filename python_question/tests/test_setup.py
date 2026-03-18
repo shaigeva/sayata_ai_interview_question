@@ -2,7 +2,7 @@
 
 from fastapi.testclient import TestClient
 
-from sayata.server import app
+from sayata.server_stub import app
 
 
 def test_imports():

@@ -30,7 +30,7 @@ You should see all tests pass, including a server health check.
 
 ```bash
 # Start the stub server
-uv run uvicorn sayata.server:app --port 8000 &
+uv run uvicorn sayata.server_stub:app --port 8000 &
 
 # Check it responds
 curl http://localhost:8000/health

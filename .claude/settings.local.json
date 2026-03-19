@@ -10,7 +10,9 @@
       "Bash(rm:*)",
       "Bash(uv run:*)",
       "Bash(uv:*)",
-      "Bash(rm Dockerfile:*)"
+      "Bash(rm Dockerfile:*)",
+      "Bash(lsof:*)",
+      "Bash(kill 24319:*)"
     ]
   }
 }

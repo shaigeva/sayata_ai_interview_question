@@ -100,6 +100,20 @@ order:
 - Carrier client interface: `src/sayata/carriers/base.py`
 - Existing carrier clients: `src/sayata/carriers/carrier_a.py`, `carrier_b.py`
 
+## Troubleshooting
+
+### Kill leftover server processes
+
+If ports are already in use when starting servers, kill any leftover processes:
+
+```bash
+# See what's running on our ports
+lsof -i :8000-8004
+
+# Kill all of them at once
+lsof -ti :8000-8004 | xargs kill
+```
+
 ## After the Interview
 
 If asked to submit your solution:

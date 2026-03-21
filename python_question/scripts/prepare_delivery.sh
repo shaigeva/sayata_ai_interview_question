@@ -3,7 +3,8 @@
 #
 # Produces:
 #   delivery/skeleton.zip  — minimal setup zip (sent before interview)
-#   delivery/exercise.zip  — exercise materials (sent during interview)
+#   delivery/exercise.zip  — code + tickets (sent during interview)
+#   delivery/docs.zip      — reference docs (sent during interview, separately)
 #
 # Skeleton source files live alongside the real files with _PREP / _stub
 # suffixes (e.g. README_PREP.md, server_stub.py, test_setup.py, about.md).
@@ -161,11 +162,7 @@ cp "$PROJECT_DIR/src/sayata/carriers/carrier_b.py" "$STAGE/src/sayata/carriers/c
 mkdir -p "$STAGE/packages"
 cp "$PROJECT_DIR/packages/$WHEEL" "$STAGE/packages/$WHEEL"
 
-# Documentation (split docs — NO domain.md)
-mkdir -p "$STAGE/docs"
-for doc in architecture.md business-rules.md glossary.md frontend-guidelines.md; do
-    cp "$PROJECT_DIR/docs/$doc" "$STAGE/docs/$doc"
-done
+# NO docs in exercise zip — delivered separately as docs.zip
 
 # Candidate tickets only (NO interviewer tickets)
 mkdir -p "$STAGE/tickets"
@@ -198,17 +195,33 @@ rm -rf "$STAGE"
 echo "  Created: delivery/exercise.zip"
 
 # =====================================================================
+# D3: Docs zip (during interview, separate from code)
+# =====================================================================
+echo "--- Building docs.zip ---"
+
+DOCS_STAGE="$DELIVERY_DIR/_docs_staging"
+mkdir -p "$DOCS_STAGE"
+
+for doc in architecture.md business-rules.md glossary.md frontend-guidelines.md; do
+    cp "$PROJECT_DIR/docs/$doc" "$DOCS_STAGE/$doc"
+done
+
+cd "$DOCS_STAGE"
+zip -q -r "$DELIVERY_DIR/docs.zip" .
+
+rm -rf "$DOCS_STAGE"
+
+echo "  Created: delivery/docs.zip"
+
+# =====================================================================
 # Summary
 # =====================================================================
 echo ""
 echo "=== Delivery artifacts ready ==="
 echo ""
 echo "  delivery/skeleton.zip  → Send to candidate before interview"
-echo "  delivery/exercise.zip  → Send to candidate during interview"
+echo "  delivery/exercise.zip  → Send to candidate during interview (code + tickets)"
+echo "  delivery/docs.zip      → Send to candidate during interview (reference docs)"
 echo ""
 echo "Verification:"
-echo "  1. mkdir test && cd test && unzip ../delivery/skeleton.zip"
-echo "  2. uv sync && uv run pytest -v"
-echo "  3. unzip -o ../delivery/exercise.zip && bash setup.sh"
-echo "  4. uv run python scripts/start.py"
-echo "  5. uv run python scripts/verify.py"
+echo "  bash scripts/test_delivery.sh"

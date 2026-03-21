@@ -7,11 +7,13 @@ Start all servers first:  uv run python scripts/start.py
 Then run:                 uv run pytest tests/test_verification.py -v
 """
 
+import os
 import time
 
 import requests
 
-BASE_URL = "http://localhost:8000"
+BASE_PORT = int(os.environ.get("BASE_PORT", "8000"))
+BASE_URL = f"http://localhost:{BASE_PORT}"
 
 
 # ---------------------------------------------------------------------------

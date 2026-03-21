@@ -2,16 +2,20 @@
 # End-to-end test of the full delivery pipeline.
 #
 # Simulates the candidate experience:
-#   1. Build delivery artifacts (skeleton + exercise.zip)
+#   1. Build delivery artifacts (skeleton.zip + exercise.zip + docs.zip)
 #   2. Set up skeleton in a temp dir, run tests
 #   3. Extract exercise zip, run setup
 #   4. Start all servers
 #   5. Run verify.py
 #   6. Run interviewer test suite
 #   7. Check nothing leaked (no simulator source, no interviewer content)
+#   8. Verify docs are separate (not in exercise)
+#
+# Uses BASE_PORT (default 9100) to avoid colliding with dev sessions.
 #
 # Usage:
 #   bash scripts/test_delivery.sh
+#   BASE_PORT=9200 bash scripts/test_delivery.sh
 
 set -euo pipefail
 
@@ -22,10 +26,12 @@ SERVER_PID=""
 PASS=0
 FAIL=0
 
+export BASE_PORT="${BASE_PORT:-9100}"
+PORT_END=$((BASE_PORT + 4))
+
 cleanup() {
     echo ""
     echo "Cleaning up..."
-    # Kill any servers we started
     if [ -n "$SERVER_PID" ]; then
         kill "$SERVER_PID" 2>/dev/null || true
         wait "$SERVER_PID" 2>/dev/null || true
@@ -42,7 +48,8 @@ wait_for_ports() {
     local waited=0
     while [ $waited -lt $max_wait ]; do
         local all_up=true
-        for port in 8000 8001 8002 8003 8004; do
+        for offset in 0 1 2 3 4; do
+            local port=$((BASE_PORT + offset))
             if ! curl -s --max-time 1 "http://localhost:$port/" > /dev/null 2>&1; then
                 all_up=false
                 break
@@ -60,11 +67,12 @@ wait_for_ports() {
 echo "=== End-to-end delivery test ==="
 echo "  Project: $PROJECT_DIR"
 echo "  Test dir: $TEST_DIR"
+echo "  Ports: ${BASE_PORT}-${PORT_END}"
 echo ""
 
 # --- Pre-run: kill any leftover processes on our ports ---
-echo "--- Pre-run: clearing ports 8000-8004 ---"
-lsof -ti :8000-8004 2>/dev/null | xargs kill 2>/dev/null || true
+echo "--- Pre-run: clearing ports ${BASE_PORT}-${PORT_END} ---"
+lsof -ti :${BASE_PORT}-${PORT_END} 2>/dev/null | xargs kill 2>/dev/null || true
 sleep 1
 
 # ------------------------------------------------------------------
@@ -73,8 +81,8 @@ sleep 1
 echo "--- Step 1: Build delivery artifacts ---"
 cd "$PROJECT_DIR"
 bash scripts/prepare_delivery.sh > /dev/null 2>&1
-if [ -f delivery/skeleton.zip ] && [ -f delivery/exercise.zip ]; then
-    pass "delivery artifacts created"
+if [ -f delivery/skeleton.zip ] && [ -f delivery/exercise.zip ] && [ -f delivery/docs.zip ]; then
+    pass "delivery artifacts created (skeleton.zip + exercise.zip + docs.zip)"
 else
     fail "delivery artifacts missing"
     exit 1
@@ -121,7 +129,7 @@ uv run python scripts/start.py > /dev/null 2>&1 &
 SERVER_PID=$!
 
 if wait_for_ports; then
-    pass "servers started (pid $SERVER_PID)"
+    pass "servers started (pid $SERVER_PID, ports ${BASE_PORT}-${PORT_END})"
 else
     fail "servers did not start within 15s"
     exit 1
@@ -141,7 +149,6 @@ fi
 # Step 6: Interviewer test suite (baseline only)
 # ------------------------------------------------------------------
 echo "--- Step 6: Interviewer baseline tests ---"
-# Run only baseline tests (these should pass with unmodified skeleton)
 cd "$PROJECT_DIR"
 if uv run pytest tests/interviewer/test_verification.py -v -k "basic_flow or submission_not_found or low_revenue" 2>&1 | tail -5; then
     pass "baseline verification tests"
@@ -176,8 +183,15 @@ else
     pass "no verification tests leaked"
 fi
 
+# Docs NOT in exercise directory (delivered separately)
+if find "$TEST_DIR/docs" -name "architecture.md" 2>/dev/null | grep -q .; then
+    fail "docs found in exercise (should be separate)"
+else
+    pass "docs not in exercise directory"
+fi
+
 # Confirm key exercise files are present
-for f in README.md src/sayata/server.py src/sayata/carriers/carrier_a.py docs/business-rules.md tickets/ticket-1.md scripts/start.py; do
+for f in README.md src/sayata/server.py src/sayata/carriers/carrier_a.py tickets/ticket-1.md scripts/start.py; do
     if [ ! -f "$TEST_DIR/$f" ]; then
         fail "missing exercise file: $f"
     fi
@@ -191,6 +205,17 @@ for f in README_PREP.md src/sayata/server_stub.py tests/test_setup.py docs/about
     fi
 done
 pass "skeleton files still present (no overwrites)"
+
+# Confirm docs.zip has the right content
+DOCS_DIR="$(mktemp -d)"
+unzip -o "$PROJECT_DIR/delivery/docs.zip" -d "$DOCS_DIR" > /dev/null
+for doc in architecture.md business-rules.md glossary.md frontend-guidelines.md; do
+    if [ ! -f "$DOCS_DIR/$doc" ]; then
+        fail "missing doc in docs.zip: $doc"
+    fi
+done
+pass "docs.zip contains all reference docs"
+rm -rf "$DOCS_DIR"
 
 # ------------------------------------------------------------------
 # Summary

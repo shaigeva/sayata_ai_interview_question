@@ -86,17 +86,17 @@ order:
 
 | Ticket | Type | Description |
 |--------|------|-------------|
-| [ticket-1](tickets/candidate/ticket-1.md) | Bug | Quotes missing for high-value policies |
-| [ticket-2](tickets/candidate/ticket-2.md) | Bug | Quotes missing for high-limit requests |
+| [ticket-1](tickets/candidate/ticket-1.md) | Bug | Missing quote for "Big Tech Corp" |
+| [ticket-2](tickets/candidate/ticket-2.md) | Bug | Missing quotes for "Large Enterprise" |
 | [ticket-3](tickets/candidate/ticket-3.md) | Feature | Integrate Carrier C |
 | [ticket-4](tickets/candidate/ticket-4.md) | Feature | Integrate Carrier D |
 
 ## Reference
 
-- Platform architecture: `docs/architecture.md`
-- Business rules & principles: `docs/business-rules.md`
-- Insurance glossary: `docs/glossary.md`
-- UX & frontend reference: `docs/frontend-guidelines.md`
+Reference documentation (architecture, business rules, glossary, etc.) has been
+provided separately. Make sure you have it available — some tasks require
+information from those docs.
+
 - Carrier client interface: `src/sayata/carriers/base.py`
 - Existing carrier clients: `src/sayata/carriers/carrier_a.py`, `carrier_b.py`
 

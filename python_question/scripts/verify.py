@@ -8,11 +8,13 @@ This script sends a few requests to the running server and prints the results.
 Use it to quickly check that the basic flow works. It does NOT use pytest.
 """
 
+import os
 import sys
 
 import requests
 
-BASE_URL = "http://localhost:8000"
+BASE_PORT = int(os.environ.get("BASE_PORT", "8000"))
+BASE_URL = f"http://localhost:{BASE_PORT}"
 
 
 def main():
@@ -108,9 +110,15 @@ def main():
 
     # --- Check carrier simulators ---
     print("4. Carrier simulator status:")
-    for port, name in [(8001, "Carrier A"), (8002, "Carrier B"), (8003, "Carrier C"), (8004, "Carrier D")]:
+    carriers = [
+        (BASE_PORT + 1, "Carrier A"),
+        (BASE_PORT + 2, "Carrier B"),
+        (BASE_PORT + 3, "Carrier C"),
+        (BASE_PORT + 4, "Carrier D"),
+    ]
+    for port, name in carriers:
         try:
-            if port == 8004:
+            if port == BASE_PORT + 4:
                 resp = requests.get(f"http://localhost:{port}/api/v1/info", timeout=2)
             else:
                 resp = requests.get(f"http://localhost:{port}/status", timeout=2)

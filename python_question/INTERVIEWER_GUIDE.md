@@ -36,9 +36,10 @@ From this repo:
 bash scripts/prepare_delivery.sh
 ```
 
-This produces two files in `delivery/`:
+This produces three files in `delivery/`:
 - `skeleton.zip` — send now (environment setup only, no exercise content)
-- `exercise.zip` — send during the interview
+- `exercise.zip` — send during the interview (code + tickets)
+- `docs.zip` — send during the interview (reference documentation, separate from code)
 
 ### Send skeleton.zip to the candidate
 
@@ -99,28 +100,39 @@ If they report issues, common fixes:
 
 ### Before the call
 
-1. Have `delivery/exercise.zip` ready to share via Zoom chat
+1. Have `delivery/exercise.zip` and `delivery/docs.zip` ready to share
 2. Open `tickets/interviewer/ticket-*.md` for reference
 
 ### Delivering the exercise (first 5 minutes)
 
-Share `delivery/exercise.zip` via Zoom chat and tell the candidate (copy-paste):
+Send **two files** via Zoom chat: `exercise.zip` and `docs.zip`. Tell the
+candidate (copy-paste):
 
-> Extract this zip into your project folder — the same one from the setup.
-> It will add the exercise files alongside what's already there.
+> I'm sending you two files:
 >
-> ```
-> cd sayata-interview
-> unzip exercise.zip
-> bash setup.sh
-> ```
+> 1. **exercise.zip** — extract this into your project folder (the same one
+>    from the setup), then run the setup script:
+>    ```
+>    cd sayata-interview
+>    cp ~/Downloads/exercise.zip .
+>    unzip exercise.zip
+>    bash setup.sh
+>    ```
 >
-> Then start the servers:
+> 2. **docs.zip** — this contains reference documentation (architecture,
+>    business rules, glossary, etc.). Save it wherever is convenient for you.
+>
+> Once setup is done, start the servers:
 > ```
 > uv run python scripts/start.py
 > ```
 >
 > Open `README.md` for the full instructions and tasks.
+
+**Why docs are separate:** The docs are intentionally *not* inside the project
+directory. This tests whether the candidate actively consults documentation
+and connects it to the code, rather than relying on AI tools that automatically
+discover files in the project tree.
 
 ### How the candidate verifies exercise setup
 
@@ -135,23 +147,20 @@ After extracting, the candidate should confirm:
    ls README.md README_PREP.md
    ls src/sayata/server.py src/sayata/server_stub.py
    ls tickets/
-   ls docs/
    ```
    - `README.md` (new — exercise instructions) alongside `README_PREP.md`
      (original setup readme)
    - `src/sayata/server.py` (new — the real server) alongside
      `src/sayata/server_stub.py` (original stub)
    - `tickets/` directory with `ticket-1.md` through `ticket-4.md`
-   - `docs/` directory with `architecture.md`, `business-rules.md`,
-     `glossary.md`, `frontend-guidelines.md`
 
 3. **Servers start and respond** — after running `uv run python scripts/start.py`,
    in a second terminal:
    ```
    uv run python scripts/verify.py
    ```
-   This should show the server is up, carrier simulators are running on
-   ports 8001–8004, and a basic submission returns 2 quotes.
+   This should show the server is up, carrier simulators are running, and
+   a basic submission returns 2 quotes.
 
 If something looks wrong, the most common issue is extracting the zip into a
 subfolder instead of the project root. The fix: re-extract with
@@ -169,8 +178,9 @@ subfolder instead of the project root. The fix: re-extract with
 
 ### What to observe
 
-- **Do they read the docs?** Ticket 2 requires finding Principle 5 in
-  `docs/business-rules.md`. Candidates who skip docs will miss the fallback rule.
+- **Do they use the docs?** The reference docs were delivered separately — do
+  they open them, or forget they exist? Ticket 2 requires finding Principle 5
+  in `business-rules.md`. Candidates who skip docs will miss the fallback rule.
 - **Do they explore the APIs?** Carrier C's polling pattern and Carrier D's
   self-describing endpoint both require API exploration.
 - **Do they parallelize?** Strong candidates will kick off AI tasks for multiple
@@ -367,8 +377,8 @@ uv run pytest tests/interviewer/test_verification.py -v
 ```
 
 Full pytest suite with 14 tests covering every task. Run this from **this
-repo** (not the candidate's repo) against the candidate's running servers on
-localhost:8000. The tests hit the same server the candidate is running.
+repo** (not the candidate's repo) against the candidate's running servers.
+The tests hit the same server the candidate is running.
 
 #### Test breakdown by ticket
 
@@ -415,27 +425,13 @@ Run the automated end-to-end test:
 bash scripts/test_delivery.sh
 ```
 
-This script builds both zips, simulates the full candidate flow in a temp
+This script builds all three zips, simulates the full candidate flow in a temp
 directory (extract skeleton → `uv sync` → extract exercise → `setup.sh` →
-start servers → `verify.py` → baseline tests → leak checks), and reports
-pass/fail for 13 checks.
+start servers → `verify.py` → baseline tests → leak checks → docs.zip
+verification), and reports pass/fail.
 
-You can also run it manually:
-
-```bash
-bash scripts/prepare_delivery.sh
-
-mkdir /tmp/test_interview && cd /tmp/test_interview
-unzip /path/to/delivery/skeleton.zip
-uv sync && uv run pytest -v
-
-unzip -o /path/to/delivery/exercise.zip
-bash setup.sh
-uv run python scripts/start.py &
-sleep 3
-uv run python scripts/verify.py
-kill %1
-```
+The test uses `BASE_PORT=9100` by default to avoid colliding with any dev
+session on the standard 8000 range.
 
 ---
 
@@ -463,8 +459,22 @@ A: The wheel contains .pyc compiled for Python 3.12. Check the candidate is
 using exactly 3.12 (`python3 --version`). Run `uv python install 3.12` if needed.
 
 **Q: Servers won't start (port already in use).**
-A: Kill existing processes: `lsof -i :8000-8004 | grep LISTEN` then
-`kill <pid>`. Or restart terminal.
+A: Kill existing processes: `lsof -ti :8000-8004 | xargs kill`. Or use a
+different port range: `BASE_PORT=9000 uv run python scripts/start.py`.
+
+**Q: Running parallel interview sessions on the same machine.**
+A: All scripts support the `BASE_PORT` environment variable. Set different
+ranges for each session:
+```bash
+# Session 1 (default)
+uv run python scripts/start.py
+
+# Session 2
+BASE_PORT=9000 uv run python scripts/start.py
+
+# Interviewer tests against session 2
+BASE_PORT=9000 uv run pytest tests/interviewer/test_verification.py -v
+```
 
 **Q: Candidate asks about the simulators — can they see the source?**
 A: No. The simulators are distributed as compiled bytecode (`.pyc` in a wheel).
@@ -474,10 +484,10 @@ This is intentional — they need to explore the APIs like real-world integratio
 A: Ask them to improve error handling, add tests, refactor, or explain their
 approach in detail. You can also discuss alternative implementations.
 
-**Q: Candidate hasn't read the docs at all.**
-A: Nudge them: "There's some reference documentation in the `docs/` folder
-that might help." Don't point to the specific principle — discovering it is
-part of the exercise.
+**Q: Candidate hasn't looked at the reference docs.**
+A: Nudge them: "We sent some reference documentation alongside the exercise —
+have you had a chance to look through it?" Don't point to the specific
+document or principle — discovering what's relevant is part of the exercise.
 
 **Q: Candidate is stuck on Ticket 2 but hasn't found Principle 5.**
 A: After 10+ minutes: "The business rules document has some guidance on what

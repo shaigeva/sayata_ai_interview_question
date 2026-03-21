@@ -1,5 +1,6 @@
 """Sayata quoting platform — candidate's server."""
 
+import os
 import uuid
 
 from fastapi import FastAPI, HTTPException
@@ -18,6 +19,8 @@ from sayata.models import (
 
 app = FastAPI(title="Sayata Quoting Platform")
 
+BASE_PORT = int(os.environ.get("BASE_PORT", "8000"))
+
 
 @app.get("/health")
 async def health():
@@ -30,8 +33,8 @@ submission_quotes: dict[str, list[Quote]] = {}
 
 # Registered carriers — only A and B are wired in.
 CARRIERS = [
-    CarrierAClient(base_url="http://localhost:8001"),
-    CarrierBClient(base_url="http://localhost:8002"),
+    CarrierAClient(base_url=f"http://localhost:{BASE_PORT + 1}"),
+    CarrierBClient(base_url=f"http://localhost:{BASE_PORT + 2}"),
 ]
 
 

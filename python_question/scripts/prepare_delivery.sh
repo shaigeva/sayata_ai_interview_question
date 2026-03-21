@@ -2,8 +2,8 @@
 # Prepare delivery artifacts from this repo.
 #
 # Produces:
-#   delivery/skeleton/     — minimal setup repo (pre-interview)
-#   delivery/exercise.zip  — exercise materials (during interview)
+#   delivery/skeleton.zip  — minimal setup zip (sent before interview)
+#   delivery/exercise.zip  — exercise materials (sent during interview)
 #
 # Skeleton source files live alongside the real files with _PREP / _stub
 # suffixes (e.g. README_PREP.md, server_stub.py, test_setup.py, about.md).
@@ -31,14 +31,14 @@ fi
 
 # --- Clean previous output ---
 rm -rf "$DELIVERY_DIR"
-mkdir -p "$DELIVERY_DIR/skeleton" "$DELIVERY_DIR/_exercise_staging"
+mkdir -p "$DELIVERY_DIR/_skeleton_staging" "$DELIVERY_DIR/_exercise_staging"
 
 # =====================================================================
-# D1: Skeleton repo (pre-interview)
+# D1: Skeleton zip (pre-interview)
 # =====================================================================
-echo "--- Building skeleton repo ---"
+echo "--- Building skeleton.zip ---"
 
-SKEL="$DELIVERY_DIR/skeleton"
+SKEL="$DELIVERY_DIR/_skeleton_staging"
 
 # Copy skeleton source files (same names — no renaming)
 cp "$PROJECT_DIR/README_PREP.md" "$SKEL/README_PREP.md"
@@ -95,7 +95,14 @@ SKEL_IGNORE
 find "$SKEL" -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
 find "$SKEL" -name "*.pyc" -delete 2>/dev/null || true
 
-echo "  Created: delivery/skeleton/"
+# Build the zip
+cd "$SKEL"
+zip -q -r "$DELIVERY_DIR/skeleton.zip" .
+
+# Cleanup staging
+rm -rf "$SKEL"
+
+echo "  Created: delivery/skeleton.zip"
 
 # =====================================================================
 # D2: Exercise zip (during interview)
@@ -196,11 +203,12 @@ echo "  Created: delivery/exercise.zip"
 echo ""
 echo "=== Delivery artifacts ready ==="
 echo ""
-echo "  delivery/skeleton/     → Push to candidate-facing repo"
-echo "  delivery/exercise.zip  → Share during interview"
+echo "  delivery/skeleton.zip  → Send to candidate before interview"
+echo "  delivery/exercise.zip  → Send to candidate during interview"
 echo ""
 echo "Verification:"
-echo "  1. cd to a fresh dir, copy skeleton/, run: uv sync && uv run pytest -v"
-echo "  2. Extract exercise.zip into it, run: bash setup.sh"
-echo "  3. Start servers: uv run python scripts/start.py"
-echo "  4. Verify: uv run python scripts/verify.py"
+echo "  1. mkdir test && cd test && unzip ../delivery/skeleton.zip"
+echo "  2. uv sync && uv run pytest -v"
+echo "  3. unzip -o ../delivery/exercise.zip && bash setup.sh"
+echo "  4. uv run python scripts/start.py"
+echo "  5. uv run python scripts/verify.py"

@@ -73,7 +73,7 @@ sleep 1
 echo "--- Step 1: Build delivery artifacts ---"
 cd "$PROJECT_DIR"
 bash scripts/prepare_delivery.sh > /dev/null 2>&1
-if [ -d delivery/skeleton ] && [ -f delivery/exercise.zip ]; then
+if [ -f delivery/skeleton.zip ] && [ -f delivery/exercise.zip ]; then
     pass "delivery artifacts created"
 else
     fail "delivery artifacts missing"
@@ -84,7 +84,7 @@ fi
 # Step 2: Skeleton setup
 # ------------------------------------------------------------------
 echo "--- Step 2: Skeleton setup ---"
-cp -r delivery/skeleton/* "$TEST_DIR/"
+unzip -o delivery/skeleton.zip -d "$TEST_DIR" > /dev/null
 cd "$TEST_DIR"
 
 uv sync > /dev/null 2>&1

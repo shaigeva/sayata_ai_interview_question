@@ -26,43 +26,142 @@ Completing all 4 is not expected. 2–3 tasks in 60–90 minutes is a strong res
 
 ---
 
-## 2. Pre-Interview Checklist
+## 2. Pre-Interview Setup (days before)
 
-**Days before the interview:**
+### Build the delivery artifacts
 
-1. Share the skeleton repo link with the candidate
-2. Ask them to:
-   - Clone the repo
-   - Run `uv sync` and `uv run pytest` to verify their environment
-   - Set up their preferred AI tools (Cursor, Copilot, Claude Code, etc.)
-3. Confirm they have Python 3.12 (exactly — not 3.13+) and [uv](https://docs.astral.sh/uv/) installed.
-   If they don't have 3.12: `uv python install 3.12`
+From this repo:
 
-**Before the call:**
+```bash
+bash scripts/prepare_delivery.sh
+```
 
-1. Run `bash scripts/prepare_delivery.sh` from this repo to generate
-   `delivery/exercise.zip`
-2. Have the zip file ready to share via Zoom chat or screen share
-3. Open `tickets/interviewer/ticket-*.md` for reference during the interview
+This produces two files in `delivery/`:
+- `skeleton.zip` — send now (environment setup only, no exercise content)
+- `exercise.zip` — send during the interview
+
+### Send skeleton.zip to the candidate
+
+Send `delivery/skeleton.zip` to the candidate via email/Slack/etc. along with
+the following message (copy-paste):
+
+> **Interview exercise — environment setup**
+>
+> Please complete these steps before our interview:
+>
+> 1. Make sure you have **Python 3.12** (exactly — not 3.13+) and
+>    **[uv](https://docs.astral.sh/uv/)** installed.
+>    If you don't have Python 3.12: `uv python install 3.12`
+>
+> 2. Create a new folder, copy the zip into it, and extract:
+>    ```
+>    mkdir sayata-interview
+>    cp ~/Downloads/skeleton.zip sayata-interview/
+>    cd sayata-interview
+>    unzip skeleton.zip
+>    ```
+>
+> 3. Install dependencies and run the tests:
+>    ```
+>    uv sync
+>    uv run pytest -v
+>    ```
+>    You should see **2 tests pass** (an import check and a server health check).
+>
+> 4. Set up your preferred AI tools (Cursor, Copilot, Claude Code, etc.) in
+>    this project.
+>
+> 5. You're expected to use AI tooling during the interview — that's part of
+>    what we're evaluating.
+>
+> During the interview you'll receive a second zip with the actual exercise.
+> This setup is just to make sure your environment is ready so we don't
+> spend interview time on installation.
+
+### How the candidate verifies skeleton setup
+
+They should see this when they run `uv run pytest -v`:
+
+```
+tests/test_setup.py::test_imports PASSED
+tests/test_setup.py::test_server_health PASSED
+
+2 passed
+```
+
+If they report issues, common fixes:
+- Wrong Python version → `uv python install 3.12`
+- `uv` not installed → `curl -LsSf https://astral.sh/uv/install.sh | sh`
 
 ---
 
 ## 3. During the Interview
 
-### Delivering the exercise
+### Before the call
 
-1. Share `delivery/exercise.zip` via Zoom chat
-2. Tell the candidate: "Extract this into your project root — it will add the
-   exercise files. Then run `bash setup.sh` to install the remaining
-   dependencies."
-3. Once setup completes: "Run `uv run python scripts/start.py` to start all
-   servers, then open the README for task details."
+1. Have `delivery/exercise.zip` ready to share via Zoom chat
+2. Open `tickets/interviewer/ticket-*.md` for reference
+
+### Delivering the exercise (first 5 minutes)
+
+Share `delivery/exercise.zip` via Zoom chat and tell the candidate (copy-paste):
+
+> Extract this zip into your project folder — the same one from the setup.
+> It will add the exercise files alongside what's already there.
+>
+> ```
+> cd sayata-interview
+> unzip exercise.zip
+> bash setup.sh
+> ```
+>
+> Then start the servers:
+> ```
+> uv run python scripts/start.py
+> ```
+>
+> Open `README.md` for the full instructions and tasks.
+
+### How the candidate verifies exercise setup
+
+After extracting, the candidate should confirm:
+
+1. **`setup.sh` completes without errors** — it installs the carrier
+   simulator package.
+
+2. **Key files are in place** — they should see both the original skeleton
+   files and the new exercise files:
+   ```
+   ls README.md README_PREP.md
+   ls src/sayata/server.py src/sayata/server_stub.py
+   ls tickets/
+   ls docs/
+   ```
+   - `README.md` (new — exercise instructions) alongside `README_PREP.md`
+     (original setup readme)
+   - `src/sayata/server.py` (new — the real server) alongside
+     `src/sayata/server_stub.py` (original stub)
+   - `tickets/` directory with `ticket-1.md` through `ticket-4.md`
+   - `docs/` directory with `architecture.md`, `business-rules.md`,
+     `glossary.md`, `frontend-guidelines.md`
+
+3. **Servers start and respond** — after running `uv run python scripts/start.py`,
+   in a second terminal:
+   ```
+   uv run python scripts/verify.py
+   ```
+   This should show the server is up, carrier simulators are running on
+   ports 8001–8004, and a basic submission returns 2 quotes.
+
+If something looks wrong, the most common issue is extracting the zip into a
+subfolder instead of the project root. The fix: re-extract with
+`unzip -o exercise.zip` from the project root.
 
 ### Timeline (suggested for 90 minutes)
 
 | Time | Phase |
 |------|-------|
-| 0–5 min | Deliver zip, candidate sets up |
+| 0–5 min | Deliver zip, candidate sets up and verifies |
 | 5–10 min | Candidate reads README + tickets, orients |
 | 10–70 min | Working time |
 | 70–80 min | Wrap up, discuss approach |
@@ -310,43 +409,33 @@ uv run pytest tests/interviewer/test_verification.py -v -k "ticket4"
 ### Pre-interview: testing the delivery artifacts
 
 Before the interview, verify that the full delivery pipeline works end-to-end.
-Run `scripts/prepare_delivery.sh`, then simulate the candidate flow in a temp
-directory:
+Run the automated end-to-end test:
 
 ```bash
-# 1. Build delivery artifacts
+bash scripts/test_delivery.sh
+```
+
+This script builds both zips, simulates the full candidate flow in a temp
+directory (extract skeleton → `uv sync` → extract exercise → `setup.sh` →
+start servers → `verify.py` → baseline tests → leak checks), and reports
+pass/fail for 13 checks.
+
+You can also run it manually:
+
+```bash
 bash scripts/prepare_delivery.sh
 
-# 2. Simulate skeleton setup
-cd /tmp && rm -rf test_interview
-cp -r /path/to/delivery/skeleton test_interview
-cd test_interview
-uv sync
-uv run pytest -v          # 2 tests: imports + server health check
+mkdir /tmp/test_interview && cd /tmp/test_interview
+unzip /path/to/delivery/skeleton.zip
+uv sync && uv run pytest -v
 
-# 3. Simulate exercise delivery
-unzip /path/to/delivery/exercise.zip
+unzip -o /path/to/delivery/exercise.zip
 bash setup.sh
-
-# 4. Start servers and verify
 uv run python scripts/start.py &
 sleep 3
 uv run python scripts/verify.py
-
-# 5. Confirm no simulator source is visible
-find . -name "*.py" -path "*/simulators/*"   # should find nothing
-
-# 6. Confirm no interviewer content leaked
-find . -name "test_verification*"            # should find nothing
-find . -path "*/interviewer/*"               # should find nothing
-
-# 7. Clean up
 kill %1
 ```
-
-The skeleton's `test_setup.py` uses FastAPI's `TestClient` to hit a `/health`
-endpoint on a stub server. This stub is replaced by the real server when the
-exercise zip is extracted — no conflict, just an overwrite.
 
 ---
 

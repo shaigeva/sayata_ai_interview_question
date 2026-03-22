@@ -5,3 +5,7 @@ __pycache__/
 *.egg-info/
 packages/
 delivery/
+docs.zip
+exercise.zip
+skeleton-docs.zip
+skeleton.zip

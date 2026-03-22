@@ -200,10 +200,10 @@ echo "  Created: delivery/exercise.zip"
 echo "--- Building docs.zip ---"
 
 DOCS_STAGE="$DELIVERY_DIR/_docs_staging"
-mkdir -p "$DOCS_STAGE"
+mkdir -p "$DOCS_STAGE/docs"
 
 for doc in business-rules.md glossary.md frontend-guidelines.md; do
-    cp "$PROJECT_DIR/docs/$doc" "$DOCS_STAGE/$doc"
+    cp "$PROJECT_DIR/docs/$doc" "$DOCS_STAGE/docs/$doc"
 done
 
 cd "$DOCS_STAGE"

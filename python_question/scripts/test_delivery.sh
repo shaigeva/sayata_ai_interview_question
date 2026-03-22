@@ -210,7 +210,7 @@ pass "skeleton files still present (no overwrites)"
 DOCS_DIR="$(mktemp -d)"
 unzip -o "$PROJECT_DIR/delivery/docs.zip" -d "$DOCS_DIR" > /dev/null
 for doc in business-rules.md glossary.md frontend-guidelines.md; do
-    if [ ! -f "$DOCS_DIR/$doc" ]; then
+    if [ ! -f "$DOCS_DIR/docs/$doc" ]; then
         fail "missing doc in docs.zip: $doc"
     fi
 done

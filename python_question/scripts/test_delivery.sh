@@ -81,8 +81,8 @@ sleep 1
 echo "--- Step 1: Build delivery artifacts ---"
 cd "$PROJECT_DIR"
 bash scripts/prepare_delivery.sh > /dev/null 2>&1
-if [ -f delivery/skeleton.zip ] && [ -f delivery/exercise.zip ] && [ -f delivery/docs.zip ]; then
-    pass "delivery artifacts created (skeleton.zip + exercise.zip + docs.zip)"
+if [ -f delivery/skeleton.zip ] && [ -f delivery/skeleton-docs.zip ] && [ -f delivery/exercise.zip ] && [ -f delivery/docs.zip ]; then
+    pass "delivery artifacts created (4 zips)"
 else
     fail "delivery artifacts missing"
     exit 1
@@ -199,12 +199,22 @@ done
 pass "all exercise files present"
 
 # Confirm skeleton files coexist
-for f in README_PREP.md src/sayata/server_stub.py tests/test_setup.py docs/about.md; do
+for f in README_PREP.md src/sayata/server_stub.py tests/test_setup.py; do
     if [ ! -f "$TEST_DIR/$f" ]; then
         fail "missing skeleton file: $f"
     fi
 done
 pass "skeleton files still present (no overwrites)"
+
+# Confirm skeleton-docs.zip has about.md
+SKEL_DOCS_DIR="$(mktemp -d)"
+unzip -o "$PROJECT_DIR/delivery/skeleton-docs.zip" -d "$SKEL_DOCS_DIR" > /dev/null
+if [ -f "$SKEL_DOCS_DIR/docs/about.md" ]; then
+    pass "skeleton-docs.zip contains docs/about.md"
+else
+    fail "skeleton-docs.zip missing docs/about.md"
+fi
+rm -rf "$SKEL_DOCS_DIR"
 
 # Confirm docs.zip has the right content
 DOCS_DIR="$(mktemp -d)"

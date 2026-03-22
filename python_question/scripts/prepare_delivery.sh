@@ -2,9 +2,10 @@
 # Prepare delivery artifacts from this repo.
 #
 # Produces:
-#   delivery/skeleton.zip  — minimal setup zip (sent before interview)
-#   delivery/exercise.zip  — code + tickets (sent during interview)
-#   delivery/docs.zip      — reference docs (sent during interview, separately)
+#   delivery/skeleton.zip      — code setup (sent before interview)
+#   delivery/skeleton-docs.zip — background docs (sent before interview, separately)
+#   delivery/exercise.zip      — code + tickets (sent during interview)
+#   delivery/docs.zip           — reference docs (sent during interview, separately)
 #
 # Skeleton source files live alongside the real files with _PREP / _stub
 # suffixes (e.g. README_PREP.md, server_stub.py, test_setup.py, about.md).
@@ -43,9 +44,6 @@ SKEL="$DELIVERY_DIR/_skeleton_staging"
 
 # Copy skeleton source files (same names — no renaming)
 cp "$PROJECT_DIR/README_PREP.md" "$SKEL/README_PREP.md"
-
-mkdir -p "$SKEL/docs"
-cp "$PROJECT_DIR/docs/about.md" "$SKEL/docs/about.md"
 
 mkdir -p "$SKEL/src/sayata"
 touch "$SKEL/src/sayata/__init__.py"
@@ -104,6 +102,16 @@ zip -q -r "$DELIVERY_DIR/skeleton.zip" .
 rm -rf "$SKEL"
 
 echo "  Created: delivery/skeleton.zip"
+
+# Build skeleton docs separately (about.md)
+SKEL_DOCS="$DELIVERY_DIR/_skeleton_docs_staging"
+mkdir -p "$SKEL_DOCS/docs"
+cp "$PROJECT_DIR/docs/about.md" "$SKEL_DOCS/docs/about.md"
+cd "$SKEL_DOCS"
+zip -q -r "$DELIVERY_DIR/skeleton-docs.zip" .
+rm -rf "$SKEL_DOCS"
+
+echo "  Created: delivery/skeleton-docs.zip"
 
 # =====================================================================
 # D2: Exercise zip (during interview)
@@ -219,9 +227,10 @@ echo "  Created: delivery/docs.zip"
 echo ""
 echo "=== Delivery artifacts ready ==="
 echo ""
-echo "  delivery/skeleton.zip  → Send to candidate before interview"
-echo "  delivery/exercise.zip  → Send to candidate during interview (code + tickets)"
-echo "  delivery/docs.zip      → Send to candidate during interview (reference docs)"
+echo "  delivery/skeleton.zip       → Send to candidate before interview (code)"
+echo "  delivery/skeleton-docs.zip  → Send to candidate before interview (background info)"
+echo "  delivery/exercise.zip       → Send to candidate during interview (code + tickets)"
+echo "  delivery/docs.zip           → Send to candidate during interview (reference docs)"
 echo ""
 echo "Verification:"
 echo "  bash scripts/test_delivery.sh"

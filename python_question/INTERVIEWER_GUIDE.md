@@ -36,17 +36,23 @@ From this repo:
 bash scripts/prepare_delivery.sh
 ```
 
-This produces three files in `delivery/`:
-- `skeleton.zip` — send now (environment setup only, no exercise content)
+This produces four files in `delivery/`:
+- `skeleton.zip` — send before interview (code setup)
+- `skeleton-docs.zip` — send before interview (background info, separate from code)
 - `exercise.zip` — send during the interview (code + tickets)
-- `docs.zip` — send during the interview (reference documentation, separate from code)
+- `docs.zip` — send during the interview (reference docs, separate from code)
 
-### Send skeleton.zip to the candidate
+### Send skeleton.zip and skeleton-docs.zip to the candidate
 
-Send `delivery/skeleton.zip` to the candidate via email/Slack/etc. along with
-the following message (copy-paste):
+Send both files to the candidate via email/Slack/etc. along with the following
+message (copy-paste):
 
 > **Interview exercise — environment setup**
+>
+> I'm sending you two files:
+>
+> 1. **skeleton.zip** — the project code
+> 2. **skeleton-docs.zip** — some background documentation
 >
 > Please complete these steps before our interview:
 >
@@ -54,7 +60,7 @@ the following message (copy-paste):
 >    **[uv](https://docs.astral.sh/uv/)** installed.
 >    If you don't have Python 3.12: `uv python install 3.12`
 >
-> 2. Create a new folder, copy the zip into it, and extract:
+> 2. Create a new folder and extract the project code:
 >    ```
 >    mkdir sayata-interview
 >    cp ~/Downloads/skeleton.zip sayata-interview/
@@ -75,9 +81,12 @@ the following message (copy-paste):
 > 5. You're expected to use AI tooling during the interview — that's part of
 >    what we're evaluating.
 >
-> During the interview you'll receive a second zip with the actual exercise.
-> This setup is just to make sure your environment is ready so we don't
-> spend interview time on installation.
+> The docs zip contains some background information about the company and
+> platform. Feel free to review it and set it up however you'd like.
+>
+> During the interview you'll receive additional files with the actual
+> exercise. This setup is just to make sure your environment is ready so we
+> don't spend interview time on installation.
 
 ### How the candidate verifies skeleton setup
 

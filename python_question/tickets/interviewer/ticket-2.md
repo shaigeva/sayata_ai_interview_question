@@ -16,14 +16,14 @@ use the nearest available limit that is >= the requested one; same for retention
 
 ## Steps to Reproduce
 
-1. Submit a business requesting a high coverage limit:
+1. Submit a business requesting an unsupported coverage limit:
    ```
    POST /submissions
    {
-     "business_name": "Large Enterprise",
-     "industry": "manufacturing",
-     "annual_revenue": 2000000,
-     "requested_limit": 5000000,
+     "business_name": "Nano Insurance Co",
+     "industry": "technology",
+     "annual_revenue": 200000,
+     "requested_limit": 1500000,
      "requested_retention": 50000
    }
    ```

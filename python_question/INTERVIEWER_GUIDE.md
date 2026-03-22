@@ -228,7 +228,7 @@ stay under $1,000.
 
 ---
 
-### Ticket 2: Missing quotes for high-limit requests
+### Ticket 2: Missing quote for unsupported limit
 
 **Root cause:** Carrier A returns HTTP 200 with an error body (not an HTTP
 error code) when the requested limit/retention isn't in their supported set.
@@ -249,7 +249,7 @@ rules will either skip the carrier or hardcode values. The rule is buried at
 Principle 5 in a 10-principle list — this is intentional.
 
 **Hints if stuck:**
-- "Have you looked at what Carrier A returns for a $5M limit?"
+- "Have you looked at what Carrier A returns for that limit?"
 - "The business rules doc has some relevant guidance for this case."
 - "Some carriers have endpoints that describe their capabilities."
 
@@ -366,15 +366,9 @@ Candidates can extend this file or create new test files.
 uv run python scripts/verify.py
 ```
 
-A non-pytest script that sends real HTTP requests to the running servers and
-prints human-readable results. It runs three scenarios:
-
-1. **Low-revenue submission** ($500K) — should return 2 quotes (baseline)
-2. **High-revenue submission** ($5M) — tests Ticket 1 (Carrier B comma bug)
-3. **High-limit submission** ($5M limit) — tests Ticket 2 (Carrier A fallback)
-
-Also pings all four carrier simulators to confirm they're running. This gives
-candidates quick visual feedback without needing to write tests.
+A non-pytest script that sends a basic submission to the running server and
+prints the results. Also pings all four carrier simulators to confirm they're
+running. Gives candidates quick visual feedback without needing to write tests.
 
 ### Layer 3: Interviewer test suite (`tests/interviewer/test_verification.py`)
 
@@ -398,7 +392,7 @@ The tests hit the same server the candidate is running.
 | `test_low_revenue_both_carriers` | Baseline | Both A and B return quotes |
 | `test_ticket1_high_value_policy` | 1 | $5M revenue → quotes from both A and B |
 | `test_ticket1_premium_is_numeric` | 1 | Carrier B premium is a number, not string |
-| `test_ticket2_high_limit_request` | 2 | $5M limit → quotes from both A and B |
+| `test_ticket2_high_limit_request` | 2 | Unsupported limit → quotes from both A and B |
 | `test_ticket2_uses_closest_limit` | 2 | Carrier A falls back to closest limit (3M for 5M) |
 | `test_ticket2_unsupported_retention` | 2 | Carrier A falls back to closest retention |
 | `test_ticket3_carrier_c_present` | 3 | Carrier C quote appears (after polling delay) |

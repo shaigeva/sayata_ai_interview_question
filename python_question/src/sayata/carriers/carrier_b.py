@@ -1,4 +1,4 @@
-"""Carrier B client — synchronous quoting with comma-formatted prices."""
+"""Carrier B client."""
 
 import httpx
 
@@ -26,13 +26,12 @@ class CarrierBClient(CarrierClient):
                 data = response.json()
                 return Quote(
                     carrier="carrier_b",
-                    premium=int(data["premium"]),  # Fails on "2,343"
+                    premium=int(data["premium"]),
                     limit=data["limit"],
                     retention=data["retention"],
                     quote_id=data["quote_id"],
                 )
             except Exception:
-                # TODO: improve error handling
                 return None
 
     async def bind_quote(self, quote_id: str) -> BindResponse:

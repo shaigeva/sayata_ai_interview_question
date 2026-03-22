@@ -1,4 +1,4 @@
-"""Carrier A client — synchronous quoting with options endpoint."""
+"""Carrier A client."""
 
 import httpx
 

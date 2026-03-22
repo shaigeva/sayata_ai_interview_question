@@ -33,7 +33,7 @@ def main():
         sys.exit(1)
 
     # --- Basic submission ---
-    print("1. Creating a basic submission (low revenue)...")
+    print("Creating a basic submission...")
     resp = requests.post(
         f"{BASE_URL}/submissions",
         json={
@@ -57,54 +57,6 @@ def main():
         for q in data["quotes"]:
             print(f"     - {q['carrier']}: premium=${q['premium']}, "
                   f"limit=${q['limit']}, retention=${q['retention']}")
-
-    print()
-
-    # --- High revenue submission ---
-    print("2. Creating a high-revenue submission ($5M)...")
-    resp = requests.post(
-        f"{BASE_URL}/submissions",
-        json={
-            "business_name": "Big Tech Corp",
-            "industry": "technology",
-            "annual_revenue": 5_000_000,
-            "requested_limit": 1_000_000,
-            "requested_retention": 50_000,
-        },
-    )
-    if resp.status_code == 201:
-        submission_id = resp.json()["id"]
-        resp = requests.get(f"{BASE_URL}/submissions/{submission_id}")
-        data = resp.json()
-        print(f"   Quotes received: {len(data['quotes'])}")
-        for q in data["quotes"]:
-            print(f"     - {q['carrier']}: premium=${q['premium']}")
-    else:
-        print(f"   Got status {resp.status_code}: {resp.text}")
-
-    print()
-
-    # --- High limit submission ---
-    print("3. Creating a high-limit submission ($5M limit)...")
-    resp = requests.post(
-        f"{BASE_URL}/submissions",
-        json={
-            "business_name": "Large Enterprise",
-            "industry": "manufacturing",
-            "annual_revenue": 2_000_000,
-            "requested_limit": 5_000_000,
-            "requested_retention": 50_000,
-        },
-    )
-    if resp.status_code == 201:
-        submission_id = resp.json()["id"]
-        resp = requests.get(f"{BASE_URL}/submissions/{submission_id}")
-        data = resp.json()
-        print(f"   Quotes received: {len(data['quotes'])}")
-        for q in data["quotes"]:
-            print(f"     - {q['carrier']}: premium=${q['premium']}, limit=${q['limit']}")
-    else:
-        print(f"   Got status {resp.status_code}: {resp.text}")
 
     print()
 

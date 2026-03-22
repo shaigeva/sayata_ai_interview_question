@@ -13,6 +13,7 @@ carrier integrations.
 - You can ask the interviewers questions at any time.
 - Tasks are independent — you can work on them in any order or in parallel.
 - Finishing all tasks is a plus, but it's not the only evaluation criterion. Do what you can.
+- Agents ARE NOT ALLOWED to reverse engineer the carrier simulators' code - it should be treated as a black box.
 
 ## Setup
 

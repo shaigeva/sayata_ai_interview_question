@@ -57,20 +57,15 @@ as a starting point:
 uv run pytest tests/ -v
 ```
 
-## Architecture
-
-See `architecture.md` in the reference documentation for the full architecture
-overview, including the system diagram and component descriptions.
-
 ## Tasks
 
 Your tasks are described in the `tickets/` directory.
 
 ## Reference
 
-Reference documentation (architecture, business rules, glossary, etc.) has been
-provided separately. Make sure you have it available — some tasks require
-information from those docs.
+Reference documentation (business rules, glossary, etc.) has been provided
+separately. Make sure you have it available — some tasks require information
+from those docs.
 
 - Carrier client interface: `src/sayata/carriers/base.py`
 - Existing carrier clients: `src/sayata/carriers/carrier_a.py`, `carrier_b.py`

@@ -202,7 +202,7 @@ echo "--- Building docs.zip ---"
 DOCS_STAGE="$DELIVERY_DIR/_docs_staging"
 mkdir -p "$DOCS_STAGE"
 
-for doc in architecture.md business-rules.md glossary.md frontend-guidelines.md; do
+for doc in business-rules.md glossary.md frontend-guidelines.md; do
     cp "$PROJECT_DIR/docs/$doc" "$DOCS_STAGE/$doc"
 done
 

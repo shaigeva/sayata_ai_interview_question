@@ -209,7 +209,7 @@ pass "skeleton files still present (no overwrites)"
 # Confirm docs.zip has the right content
 DOCS_DIR="$(mktemp -d)"
 unzip -o "$PROJECT_DIR/delivery/docs.zip" -d "$DOCS_DIR" > /dev/null
-for doc in architecture.md business-rules.md glossary.md frontend-guidelines.md; do
+for doc in business-rules.md glossary.md frontend-guidelines.md; do
     if [ ! -f "$DOCS_DIR/$doc" ]; then
         fail "missing doc in docs.zip: $doc"
     fi

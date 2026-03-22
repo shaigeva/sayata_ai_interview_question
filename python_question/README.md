@@ -64,8 +64,7 @@ Your tasks are described in the `tickets/` directory.
 ## Reference
 
 Reference documentation (business rules, glossary, etc.) has been provided
-separately. Make sure you have it available — some tasks require information
-from those docs.
+separately, containing relevant information.
 
 - Carrier client interface: `src/sayata/carriers/base.py`
 - Existing carrier clients: `src/sayata/carriers/carrier_a.py`, `carrier_b.py`

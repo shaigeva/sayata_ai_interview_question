@@ -47,7 +47,6 @@ before the interview.
 
 ## What to Expect
 
-During the interview you'll receive exercise materials (a zip file) that
-add tasks, documentation, and servers to this project. No exercise content
-is included in this setup repo — this is just to ensure your environment
-is ready.
+During the interview you'll receive exercise materials (code and tickets as a
+zip file) along with separate reference documentation. No exercise content is
+included in this setup repo — this is just to ensure your environment is ready.

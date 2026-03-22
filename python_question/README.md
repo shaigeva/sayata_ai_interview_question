@@ -30,7 +30,7 @@ uv sync
 ### Start all servers
 
 This starts the candidate server (port 8000) and four carrier simulators
-(ports 8001–8004) in a single process:
+(ports 8001–8004) in a single process (NOTE: ports are configurable):
 
 ```bash
 uv run python scripts/start.py
@@ -59,37 +59,12 @@ uv run pytest tests/ -v
 
 ## Architecture
 
-```
-You (candidate)              Carrier Simulators
-┌──────────────┐            ┌───────────────────┐
-│  server.py   │───────────▶│ Carrier A  :8001   │
-│  (port 8000) │───────────▶│ Carrier B  :8002   │
-│              │            │ Carrier C  :8003   │
-│              │            │ Carrier D  :8004   │
-└──────────────┘            └───────────────────┘
-```
-
-- **Your server** (`src/sayata/server.py`) receives submissions, fetches quotes
-  from carriers, and handles binds.
-- **Carrier simulators** are local mock APIs that behave like real insurance
-  carrier systems. They're read-only for you — don't modify them.
-- **Carrier clients** (`src/sayata/carriers/`) contain the logic for calling each
-  carrier's API.
-
-Currently, only Carrier A and Carrier B are integrated. Carriers C and D are
-running but not connected.
+See `architecture.md` in the reference documentation for the full architecture
+overview, including the system diagram and component descriptions.
 
 ## Tasks
 
-Your tasks are described in the `tickets/` directory. Work through them in any
-order:
-
-| Ticket | Type | Description |
-|--------|------|-------------|
-| [ticket-1](tickets/candidate/ticket-1.md) | Bug | Missing quote for "Big Tech Corp" |
-| [ticket-2](tickets/candidate/ticket-2.md) | Bug | Missing quotes for "Large Enterprise" |
-| [ticket-3](tickets/candidate/ticket-3.md) | Feature | Integrate Carrier C |
-| [ticket-4](tickets/candidate/ticket-4.md) | Feature | Integrate Carrier D |
+Your tasks are described in the `tickets/` directory.
 
 ## Reference
 
@@ -107,7 +82,7 @@ information from those docs.
 If ports are already in use when starting servers, kill any leftover processes:
 
 ```bash
-# See what's running on our ports
+# See what's running on our ports (check whichever ports you're using)
 lsof -i :8000-8004
 
 # Kill all of them at once

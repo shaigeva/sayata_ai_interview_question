@@ -30,3 +30,25 @@ these differences behind a unified submission → quote → bind workflow.
    against the original submission.
 4. **Binding Service** — Handles the acceptance of a specific quote by routing
    the bind request to the appropriate carrier.
+
+## Local Development Setup
+
+```
+You (candidate)              Carrier Simulators
+┌──────────────┐            ┌───────────────────┐
+│  server.py   │───────────▶│ Carrier A  :8001   │
+│  (port 8000) │───────────▶│ Carrier B  :8002   │
+│              │            │ Carrier C  :8003   │
+│              │            │ Carrier D  :8004   │
+└──────────────┘            └───────────────────┘
+```
+
+- **Your server** (`src/sayata/server.py`) receives submissions, fetches quotes
+  from carriers, and handles binds.
+- **Carrier simulators** are local mock APIs that behave like real insurance
+  carrier systems. They're read-only for you — don't modify them.
+- **Carrier clients** (`src/sayata/carriers/`) contain the logic for calling each
+  carrier's API.
+
+Currently, only Carrier A and Carrier B are integrated. Carriers C and D are
+running but not connected.

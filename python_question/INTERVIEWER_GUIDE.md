@@ -111,6 +111,7 @@ If they report issues, common fixes:
 
 1. Have `delivery/exercise.zip` and `delivery/docs.zip` ready to share
 2. Open `tickets/interviewer/ticket-*.md` for reference
+3. Review `docs/architecture.md` for a quick refresher on the system layout
 
 ### Delivering the exercise (first 5 minutes)
 

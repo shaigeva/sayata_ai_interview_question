@@ -128,8 +128,8 @@ candidate (copy-paste):
 >    bash setup.sh
 >    ```
 >
-> 2. **docs.zip** — this contains reference documentation (architecture,
->    business rules, glossary, etc.). Save it wherever is convenient for you.
+> 2. **docs.zip** — this contains reference documentation (business rules,
+>    glossary, etc.). Save it wherever is convenient for you.
 >
 > Once setup is done, start the servers:
 > ```

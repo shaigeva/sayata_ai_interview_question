@@ -1,22 +1,23 @@
-# Ticket 2: Quotes Missing for High-Limit Requests
+# Ticket 2: Missing Quote for Unsupported Limit
 
 ## Priority: High
 
 ## Description
 
-When a business requests a high coverage limit (e.g. $5M), we're not returning
-the expected number of quotes. At least one carrier is failing to produce a
-quote, but the reason isn't immediately clear from the server response.
+When a business requests a limit that Carrier A doesn't support (e.g. $1.5M),
+Carrier A returns a 200 with `{"error": "incompatible option"}`. The current
+code treats this as a valid response and produces no quote.
 
-The root cause is that some carriers don't support the exact requested limit
-or retention values. The candidate needs to discover the carrier's supported
-values (via API exploration) and implement fallback logic per the domain rules
-in `docs/domain.md` — specifically: when the exact limit isn't available,
-use the nearest available limit that is >= the requested one; same for retention.
+The candidate needs to:
+1. Discover Carrier A's supported values (the endpoint is not obvious —
+   the error message gives no hint)
+2. Read and apply the directional fallback rules from `business-rules.md`
+   (Principle 5): limits round UP, retentions round DOWN
+3. Implement fallback logic in the carrier client
 
 ## Steps to Reproduce
 
-1. Submit a business requesting an unsupported coverage limit:
+1. Submit with an unsupported limit:
    ```
    POST /submissions
    {
@@ -28,22 +29,29 @@ use the nearest available limit that is >= the requested one; same for retention
    }
    ```
 
-2. Retrieve the submission:
-   ```
-   GET /submissions/{id}
-   ```
+2. Retrieve: `GET /submissions/{id}` — only 1 quote (Carrier B), Carrier A missing.
 
-3. Fewer quotes are returned than expected.
+## The Traps
 
-## Expected Behavior
+**Trap 1 — Finding the options endpoint.** The error message just says
+"incompatible option" with no hint. The endpoint is `/quoting_options` (not
+`/options`). Candidate can discover it via FastAPI's `/docs` endpoint or by
+reading business-rules.md which mentions "options or capabilities endpoint."
 
-The platform should return quotes from all configured carriers. If a carrier
-doesn't support the exact requested limit or retention, we should still
-attempt to get a quote using the nearest supported value (see `docs/domain.md`).
+**Trap 2 — Fallback direction.** Without the docs, an AI agent will implement
+generic "closest value" logic. For limit 1.5M with options [500K, 1M, 2M, 3M]:
+- Naive "closest": 1M (distance 500K) — **WRONG**
+- Correct per business rules: 2M (nearest >=) — **RIGHT**
+This is the key test of doc extraction. The AI produces working but incorrect code.
+
+**Trap 3 — Retention direction is opposite.** For retention 75K with options
+[25K, 50K, 100K, 250K]:
+- Naive "closest": either 50K or 100K
+- Correct per business rules: 50K (nearest <=) — **retention rounds DOWN**
 
 ## What to Look For
 
-- Does the candidate explore the carrier APIs to find supported values?
-- Do they read and apply the domain rules from `docs/domain.md`?
-- Can they implement the fallback logic cleanly within the existing architecture?
-- Some carriers expose endpoints that list their supported options.
+- Does the candidate discover `/quoting_options` via API exploration or `/docs`?
+- Do they read and apply the directional rules from business-rules.md?
+- Does the naive AI solution round the wrong direction? Does the candidate catch it?
+- Does the fallback logic mutate the submission object (breaking other carriers)?

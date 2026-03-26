@@ -37,16 +37,13 @@ This starts the candidate server (port 8000) and four carrier simulators
 uv run python scripts/start.py
 ```
 
-## Verify your work
+## Verify setup
 
-With servers running, open a second terminal and run the verification script:
+With servers running, open a second terminal and verify the basic setup works:
 
 ```bash
-uv run python scripts/verify.py
+uv run python scripts/verify_setup.py
 ```
-
-This sends a few requests to the running server and prints the results so you
-can quickly check what's working.
 
 ### Testing
 

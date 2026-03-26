@@ -108,8 +108,8 @@ def test_ticket1_high_value_policy():
     assert "carrier_b" in carriers, f"Missing carrier_b. Got: {carriers}"
 
 
-def test_ticket1_premium_is_numeric():
-    """Carrier B premium should be a proper number, not a formatted string."""
+def test_ticket1_premium_is_integer():
+    """All premiums must be whole dollar amounts (integers), per frontend requirements."""
     resp = requests.post(
         f"{BASE_URL}/submissions",
         json={
@@ -126,8 +126,8 @@ def test_ticket1_premium_is_numeric():
     resp = requests.get(f"{BASE_URL}/submissions/{submission_id}")
     data = resp.json()
     for quote in data["quotes"]:
-        assert isinstance(quote["premium"], (int, float)), (
-            f"Premium from {quote['carrier']} is not numeric: {quote['premium']}"
+        assert isinstance(quote["premium"], int), (
+            f"Premium from {quote['carrier']} must be an integer, got: {quote['premium']} ({type(quote['premium']).__name__})"
         )
 
 
@@ -158,14 +158,39 @@ def test_ticket2_high_limit_request():
     assert "carrier_b" in carriers, f"Missing carrier_b. Got: {carriers}"
 
 
-def test_ticket2_uses_closest_limit():
-    """When limit is unsupported, Carrier A quote should use closest available."""
+def test_ticket2_uses_correct_fallback_direction_limit():
+    """Limit fallback must round UP (nearest >= requested), per business rules."""
     resp = requests.post(
         f"{BASE_URL}/submissions",
         json={
             "business_name": "Limit Fallback Co",
             "industry": "technology",
-            "annual_revenue": 1_000_000,
+            "annual_revenue": 200_000,
+            "requested_limit": 1_500_000,
+            "requested_retention": 50_000,
+        },
+    )
+    assert resp.status_code == 201
+    submission_id = resp.json()["id"]
+
+    resp = requests.get(f"{BASE_URL}/submissions/{submission_id}")
+    data = resp.json()
+    carrier_a_quotes = [q for q in data["quotes"] if q["carrier"] == "carrier_a"]
+    assert len(carrier_a_quotes) == 1, "Expected a quote from carrier_a"
+    # 1.5M is between 1M and 2M. Business rules say round UP → 2M (not 1M)
+    assert carrier_a_quotes[0]["limit"] == 2_000_000, (
+        f"Expected carrier_a to fall back to limit 2000000 (nearest >=) but got {carrier_a_quotes[0]['limit']}"
+    )
+
+
+def test_ticket2_limit_fallback_when_above_max():
+    """When requested limit exceeds all options, use the highest available."""
+    resp = requests.post(
+        f"{BASE_URL}/submissions",
+        json={
+            "business_name": "High Limit Co",
+            "industry": "technology",
+            "annual_revenue": 200_000,
             "requested_limit": 5_000_000,
             "requested_retention": 50_000,
         },
@@ -177,20 +202,20 @@ def test_ticket2_uses_closest_limit():
     data = resp.json()
     carrier_a_quotes = [q for q in data["quotes"] if q["carrier"] == "carrier_a"]
     assert len(carrier_a_quotes) == 1, "Expected a quote from carrier_a"
-    # Closest supported limit to 5M is 3M
+    # No supported limit >= 5M, so use highest available (3M)
     assert carrier_a_quotes[0]["limit"] == 3_000_000, (
-        f"Expected carrier_a to fall back to limit 3000000 but got {carrier_a_quotes[0]['limit']}"
+        f"Expected carrier_a to fall back to limit 3000000 (highest) but got {carrier_a_quotes[0]['limit']}"
     )
 
 
-def test_ticket2_unsupported_retention():
-    """Unsupported retention should also fall back to closest available."""
+def test_ticket2_retention_fallback_rounds_down():
+    """Retention fallback must round DOWN (nearest <= requested), per business rules."""
     resp = requests.post(
         f"{BASE_URL}/submissions",
         json={
             "business_name": "Retention Test Co",
             "industry": "technology",
-            "annual_revenue": 1_000_000,
+            "annual_revenue": 200_000,
             "requested_limit": 1_000_000,
             "requested_retention": 75_000,
         },
@@ -202,9 +227,9 @@ def test_ticket2_unsupported_retention():
     data = resp.json()
     carrier_a_quotes = [q for q in data["quotes"] if q["carrier"] == "carrier_a"]
     assert len(carrier_a_quotes) == 1
-    # Closest supported retention to 75K is either 50K or 100K
-    assert carrier_a_quotes[0]["retention"] in (50_000, 100_000), (
-        f"Expected carrier_a retention to be 50000 or 100000 but got {carrier_a_quotes[0]['retention']}"
+    # 75K is between 50K and 100K. Business rules say round DOWN → 50K (not 100K)
+    assert carrier_a_quotes[0]["retention"] == 50_000, (
+        f"Expected carrier_a retention to be 50000 (nearest <=) but got {carrier_a_quotes[0]['retention']}"
     )
 
 

@@ -181,7 +181,7 @@ done
 # Scripts
 mkdir -p "$STAGE/scripts"
 cp "$PROJECT_DIR/scripts/start.py" "$STAGE/scripts/start.py"
-cp "$PROJECT_DIR/scripts/verify.py" "$STAGE/scripts/verify.py"
+cp "$PROJECT_DIR/scripts/verify_setup.py" "$STAGE/scripts/verify_setup.py"
 
 # setup.sh
 cp "$PROJECT_DIR/setup.sh" "$STAGE/setup.sh"

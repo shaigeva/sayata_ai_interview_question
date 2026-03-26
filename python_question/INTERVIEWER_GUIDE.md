@@ -166,7 +166,7 @@ After extracting, the candidate should confirm:
 3. **Servers start and respond** — after running `uv run python scripts/start.py`,
    in a second terminal:
    ```
-   uv run python scripts/verify.py
+   uv run python scripts/verify_setup.py
    ```
    This should show the server is up, carrier simulators are running, and
    a basic submission returns 2 quotes.
@@ -230,28 +230,31 @@ stay under $1,000.
 
 ### Ticket 2: Missing quote for unsupported limit
 
-**Root cause:** Carrier A returns HTTP 200 with an error body (not an HTTP
-error code) when the requested limit/retention isn't in their supported set.
-The candidate must:
-1. Discover the `/options` endpoint on Carrier A
-2. Read Principle 5 in `docs/business-rules.md` (fallback to closest
-   supported value)
-3. Implement fallback logic in the carrier client
+**Root cause:** Carrier A returns HTTP 200 with `{"error": "incompatible option"}`
+when the requested limit/retention isn't supported. The error gives no hint
+about how to fix it. The candidate must:
+1. Discover the `/quoting_options` endpoint (not `/options` — harder to guess)
+2. Read Principle 5 in `business-rules.md` for the **directional** fallback rules
+3. Implement fallback: limits round UP (≥ requested), retentions round DOWN (≤ requested)
+
+**This is the hardest ticket for unsupervised AI.** It has three traps:
+- **Discovery:** error message says nothing useful. Must find `/quoting_options`
+  via FastAPI `/docs` or by reading business-rules.md mentioning "options or
+  capabilities endpoint."
+- **Direction:** without docs, AI implements generic "closest value" which picks
+  the wrong direction (1.5M → 1M instead of 2M). The naive solution *works* but
+  returns insufficient coverage.
+- **Asymmetry:** limits and retentions round in opposite directions.
 
 **What good looks like:**
-- Discovers Carrier A's `/options` endpoint
-- Reads and applies Principle 5 from business rules
-- Implements clean fallback: query `/options`, find nearest supported value,
-  re-request quote
-
-**This is the "doc extraction" test.** Candidates who don't read the business
-rules will either skip the carrier or hardcode values. The rule is buried at
-Principle 5 in a 10-principle list — this is intentional.
+- Discovers `/quoting_options` via API exploration or `/docs`
+- Reads and applies Principle 5's directional rules from business-rules.md
+- Implements correct fallback: limits round up, retentions round down
 
 **Hints if stuck:**
 - "Have you looked at what Carrier A returns for that limit?"
 - "The business rules doc has some relevant guidance for this case."
-- "Some carriers have endpoints that describe their capabilities."
+- "Have you explored the carrier's API? FastAPI apps often have helpful endpoints."
 
 **See:** `tickets/interviewer/ticket-2.md`
 
@@ -357,13 +360,13 @@ Shipped in the exercise zip. Two tests that prove the test infrastructure works
 by instantiating Pydantic models (`Submission`, `Quote`). These always pass.
 Candidates can extend this file or create new test files.
 
-### Layer 2: Candidate verification script (`scripts/verify.py`)
+### Layer 2: Candidate verification script (`scripts/verify_setup.py`)
 
 **Audience:** Candidate
 **Requires:** All servers running (`uv run python scripts/start.py`)
 
 ```bash
-uv run python scripts/verify.py
+uv run python scripts/verify_setup.py
 ```
 
 A non-pytest script that sends a basic submission to the running server and
@@ -430,7 +433,7 @@ bash scripts/test_delivery.sh
 
 This script builds all three zips, simulates the full candidate flow in a temp
 directory (extract skeleton → `uv sync` → extract exercise → `setup.sh` →
-start servers → `verify.py` → baseline tests → leak checks → docs.zip
+start servers → `verify_setup.py` → baseline tests → leak checks → docs.zip
 verification), and reports pass/fail.
 
 The test uses `BASE_PORT=9100` by default to avoid colliding with any dev

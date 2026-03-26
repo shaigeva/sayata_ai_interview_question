@@ -6,7 +6,7 @@
 #   2. Set up skeleton in a temp dir, run tests
 #   3. Extract exercise zip, run setup
 #   4. Start all servers
-#   5. Run verify.py
+#   5. Run verify_setup.py
 #   6. Run interviewer test suite
 #   7. Check nothing leaked (no simulator source, no interviewer content)
 #   8. Verify docs are separate (not in exercise)
@@ -138,11 +138,11 @@ fi
 # ------------------------------------------------------------------
 # Step 5: Candidate verification script
 # ------------------------------------------------------------------
-echo "--- Step 5: Candidate verify.py ---"
-if uv run python scripts/verify.py > /dev/null 2>&1; then
-    pass "verify.py runs"
+echo "--- Step 5: Candidate verify_setup.py ---"
+if uv run python scripts/verify_setup.py > /dev/null 2>&1; then
+    pass "verify_setup.py runs"
 else
-    fail "verify.py runs"
+    fail "verify_setup.py runs"
 fi
 
 # ------------------------------------------------------------------

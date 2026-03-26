@@ -1,7 +1,7 @@
-"""Carrier A simulator — synchronous quotes with an options endpoint.
+"""Carrier A simulator — synchronous quotes with quoting options endpoint.
 
 Returns quotes instantly. Rejects unsupported limits/retentions with a 200 + error body
-(not an HTTP error code). Exposes GET /options so callers can discover supported values.
+(not an HTTP error code). Exposes GET /quoting_options so callers can discover supported values.
 """
 
 import uuid
@@ -39,20 +39,14 @@ async def create_quote(body: dict):
 
     if limit not in SUPPORTED_LIMITS:
         return {
-            "error": "requested limit not available",
-            "message": (
-                f"The requested limit of {limit} is not available. "
-                "Check GET /options for supported values."
-            ),
+            "error": "incompatible option",
+            "message": f"The requested limit of {limit} is not available.",
         }
 
     if retention not in SUPPORTED_RETENTIONS:
         return {
-            "error": "requested retention not available",
-            "message": (
-                f"The requested retention of {retention} is not available. "
-                "Check GET /options for supported values."
-            ),
+            "error": "incompatible option",
+            "message": f"The requested retention of {retention} is not available.",
         }
 
     premium = _calculate_premium(
@@ -73,8 +67,8 @@ async def create_quote(body: dict):
     }
 
 
-@app.get("/options")
-async def get_options():
+@app.get("/quoting_options")
+async def get_quoting_options():
     return {
         "supported_limits": SUPPORTED_LIMITS,
         "supported_retentions": SUPPORTED_RETENTIONS,

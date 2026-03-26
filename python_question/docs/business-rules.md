@@ -37,8 +37,15 @@ Always try to offer the best quotes to the user. If a carrier does not support
 the exact requested limit or retention, the platform should request a quote for
 the closest available option rather than simply skipping that carrier. Carriers
 that expose an options or capabilities endpoint should be consulted to determine
-what values they support, and the nearest supported value should be used as a
-fallback.
+what values they support.
+
+When falling back to a supported value:
+- **Limits** must fall back to the nearest supported value that is **greater than
+  or equal to** the requested limit. Coverage should never be reduced below what
+  the user asked for. If no higher value is available, use the highest supported.
+- **Retentions** must fall back to the nearest supported value that is **less than
+  or equal to** the requested retention. The user's out-of-pocket cost should
+  never be increased. If no lower value is available, use the lowest supported.
 
 ## Principle 6: Consistent User Experience
 

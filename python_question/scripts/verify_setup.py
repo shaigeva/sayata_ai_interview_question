@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""Quick verification script — run against live servers.
+"""Setup verification script — run against live servers.
 
 Usage:
-    uv run python scripts/verify.py
+    uv run python scripts/verify_setup.py
 
-This script sends a few requests to the running server and prints the results.
-Use it to quickly check that the basic flow works. It does NOT use pytest.
+Verifies that the servers are running and a basic submission works.
 """
 
 import os

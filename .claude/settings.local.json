@@ -12,7 +12,10 @@
       "Bash(uv:*)",
       "Bash(rm Dockerfile:*)",
       "Bash(lsof:*)",
-      "Bash(kill 24319:*)"
+      "Bash(kill:*)",
+      "Bash(xargs kill:*)",
+      "Bash(find:*)",
+      "Bash(cd:*)"
     ]
   }
 }

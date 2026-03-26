@@ -83,3 +83,16 @@ registering it with the server. No changes to the core submission or quoting
 logic should be needed. The carrier client interface is the contract — as long
 as a new client implements `get_quote` and `bind_quote`, it integrates
 seamlessly.
+
+## Principle 11: Carrier API Discovery
+
+Carriers do not follow a single API standard. When integrating a new carrier,
+developers should look for self-describing API documentation endpoints. Most
+carriers expose one of the following:
+
+- `/docs` — Swagger/OpenAPI interactive documentation
+- `/api_info` — similar interactive documentation under a non-standard path
+
+Some carriers may also have custom discovery endpoints (e.g. an endpoint that
+lists available routes or supported parameters). Always explore the carrier's
+API surface before beginning integration work.

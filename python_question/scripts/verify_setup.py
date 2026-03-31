@@ -20,10 +20,10 @@ import requests
 BASE_PORT = int(os.environ.get("BASE_PORT", "8000"))
 
 CARRIERS = [
-    {"name": "Carrier A", "args": ["carrier_a"], "port": BASE_PORT + 1, "check": "/status"},
-    {"name": "Carrier B", "args": ["carrier_b"], "port": BASE_PORT + 2, "check": "/status"},
-    {"name": "Carrier C", "args": ["carrier_c"], "port": BASE_PORT + 3, "check": "/status"},
-    {"name": "Carrier D", "args": ["carrier_d"], "port": BASE_PORT + 4, "check": "/api/v1/info"},
+    {"name": "Carrier A", "id": "carrier_a", "port": BASE_PORT + 1, "check": "/status"},
+    {"name": "Carrier B", "id": "carrier_b", "port": BASE_PORT + 2, "check": "/status"},
+    {"name": "Carrier C", "id": "carrier_c", "port": BASE_PORT + 3, "check": "/status"},
+    {"name": "Carrier D", "id": "carrier_d", "port": BASE_PORT + 4, "check": "/api/v1/info"},
 ]
 
 
@@ -46,10 +46,9 @@ def check_carrier(carrier):
     print(f"  {name} (:{port})...", end=" ", flush=True)
 
     proc = subprocess.Popen(
-        ["uv", "run", "python", "scripts/start.py"] + carrier["args"],
+        ["uv", "run", "python", "scripts/start_carrier.py", carrier["id"], "--port", str(port)],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
-        env={**os.environ, "BASE_PORT": str(BASE_PORT)},
     )
 
     try:
@@ -78,10 +77,9 @@ def check_server():
     print(f"  Candidate server (:{port})...", end=" ", flush=True)
 
     proc = subprocess.Popen(
-        ["uv", "run", "python", "scripts/start.py", "server"],
+        ["uv", "run", "python", "scripts/start_server.py", "--port", str(port)],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
-        env={**os.environ, "BASE_PORT": str(BASE_PORT)},
     )
 
     try:
@@ -133,12 +131,10 @@ def main():
     print("=" * 60)
     print("Setup verified. All services start and respond correctly.")
     print()
-    print("To start all servers at once:")
-    print("  uv run python scripts/start.py")
-    print()
-    print("To start individual services:")
-    print("  uv run python scripts/start.py carrier_a")
-    print("  uv run python scripts/start.py server carrier_b")
+    print("To start servers:")
+    print("  uv run python scripts/start_server.py              # your server (port 8000)")
+    print("  uv run python scripts/start_carrier.py carrier_a   # Carrier A (port 8001)")
+    print("  uv run python scripts/start_carrier.py carrier_b --port 9002  # custom port")
     print("=" * 60)
 
 

@@ -30,22 +30,17 @@ uv sync
 
 ### Start servers
 
-Start all servers at once (candidate server + four carrier simulators):
+Start your server and the carrier simulators separately:
 
 ```bash
-uv run python scripts/start.py
+uv run python scripts/start_server.py                        # your server (port 8000)
+uv run python scripts/start_carrier.py carrier_a              # Carrier A (port 8001)
+uv run python scripts/start_carrier.py carrier_b              # Carrier B (port 8002)
+uv run python scripts/start_carrier.py carrier_c              # Carrier C (port 8003)
+uv run python scripts/start_carrier.py carrier_d              # Carrier D (port 8004)
 ```
 
-Or start individual services:
-
-```bash
-uv run python scripts/start.py server            # just your server (port 8000)
-uv run python scripts/start.py carrier_a          # just Carrier A (port 8001)
-uv run python scripts/start.py server carrier_b   # specific combination
-```
-
-Default ports: server=8000, carrier_a=8001, carrier_b=8002, carrier_c=8003,
-carrier_d=8004. Set `BASE_PORT` to shift the range.
+Use `--port` to override the default port for any service.
 
 ## Verify setup
 

@@ -178,9 +178,10 @@ for ticket in ticket-1.md ticket-2.md ticket-3.md ticket-4.md; do
     cp "$PROJECT_DIR/tickets/candidate/$ticket" "$STAGE/tickets/$ticket"
 done
 
-# Scripts
+# Scripts (candidate gets individual start scripts, NOT the unified start.py)
 mkdir -p "$STAGE/scripts"
-cp "$PROJECT_DIR/scripts/start.py" "$STAGE/scripts/start.py"
+cp "$PROJECT_DIR/scripts/start_server.py" "$STAGE/scripts/start_server.py"
+cp "$PROJECT_DIR/scripts/start_carrier.py" "$STAGE/scripts/start_carrier.py"
 cp "$PROJECT_DIR/scripts/verify_setup.py" "$STAGE/scripts/verify_setup.py"
 
 # setup.sh

@@ -22,7 +22,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 TEST_DIR="$(mktemp -d)"
-SERVER_PID=""
+PIDS=""
 PASS=0
 FAIL=0
 
@@ -32,10 +32,10 @@ PORT_END=$((BASE_PORT + 4))
 cleanup() {
     echo ""
     echo "Cleaning up..."
-    if [ -n "$SERVER_PID" ]; then
-        kill "$SERVER_PID" 2>/dev/null || true
-        wait "$SERVER_PID" 2>/dev/null || true
-    fi
+    for pid in $PIDS; do
+        kill "$pid" 2>/dev/null || true
+        wait "$pid" 2>/dev/null || true
+    done
     rm -rf "$TEST_DIR"
 }
 trap cleanup EXIT
@@ -122,14 +122,24 @@ else
 fi
 
 # ------------------------------------------------------------------
-# Step 4: Start servers
+# Step 4: Start servers (using candidate scripts)
 # ------------------------------------------------------------------
 echo "--- Step 4: Start servers ---"
-uv run python scripts/start.py > /dev/null 2>&1 &
+PIDS=""
+uv run python scripts/start_carrier.py carrier_a --port $((BASE_PORT + 1)) > /dev/null 2>&1 &
+PIDS="$PIDS $!"
+uv run python scripts/start_carrier.py carrier_b --port $((BASE_PORT + 2)) > /dev/null 2>&1 &
+PIDS="$PIDS $!"
+uv run python scripts/start_carrier.py carrier_c --port $((BASE_PORT + 3)) > /dev/null 2>&1 &
+PIDS="$PIDS $!"
+uv run python scripts/start_carrier.py carrier_d --port $((BASE_PORT + 4)) > /dev/null 2>&1 &
+PIDS="$PIDS $!"
+uv run python scripts/start_server.py --port $BASE_PORT > /dev/null 2>&1 &
 SERVER_PID=$!
+PIDS="$PIDS $SERVER_PID"
 
 if wait_for_ports; then
-    pass "servers started (pid $SERVER_PID, ports ${BASE_PORT}-${PORT_END})"
+    pass "servers started (ports ${BASE_PORT}-${PORT_END})"
 else
     fail "servers did not start within 15s"
     exit 1
@@ -191,7 +201,7 @@ else
 fi
 
 # Confirm key exercise files are present
-for f in README.md src/sayata/server.py src/sayata/carriers/carrier_a.py tickets/ticket-1.md scripts/start.py; do
+for f in README.md src/sayata/server.py src/sayata/carriers/carrier_a.py tickets/ticket-1.md scripts/start_server.py scripts/start_carrier.py; do
     if [ ! -f "$TEST_DIR/$f" ]; then
         fail "missing exercise file: $f"
     fi

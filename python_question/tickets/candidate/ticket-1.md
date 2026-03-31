@@ -1,8 +1,8 @@
-# Ticket 1: Missing Quote for "Beg Tech Corp"
+# Ticket 1: Missing Quote for "Big Tech Corp"
 
 **Priority:** High
 
-This request returns 1 quote instead of 2.
+Carrier B's quote is not included in the response for this submission.
 
 ```
 POST /submissions

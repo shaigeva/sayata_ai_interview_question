@@ -2,7 +2,7 @@
 
 **Priority:** High
 
-This request returns fewer quotes than expected.
+Carrier A's quote is not included in the response for this submission.
 
 ```
 POST /submissions

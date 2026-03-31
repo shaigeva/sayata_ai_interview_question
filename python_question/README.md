@@ -28,14 +28,24 @@ carrier integrations.
 uv sync
 ```
 
-### Start all servers
+### Start servers
 
-This starts the candidate server (port 8000) and four carrier simulators
-(ports 8001–8004) in a single process (NOTE: ports are configurable):
+Start all servers at once (candidate server + four carrier simulators):
 
 ```bash
 uv run python scripts/start.py
 ```
+
+Or start individual services:
+
+```bash
+uv run python scripts/start.py server            # just your server (port 8000)
+uv run python scripts/start.py carrier_a          # just Carrier A (port 8001)
+uv run python scripts/start.py server carrier_b   # specific combination
+```
+
+Default ports: server=8000, carrier_a=8001, carrier_b=8002, carrier_c=8003,
+carrier_d=8004. Set `BASE_PORT` to shift the range.
 
 ## Verify setup
 

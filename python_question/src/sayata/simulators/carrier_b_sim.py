@@ -45,10 +45,11 @@ async def create_quote(body: dict):
     quotes_store[quote_id] = {"premium": premium, "limit": limit, "retention": retention}
     stats["quotes_issued"] += 1
 
-    # Return premium as a comma-formatted string — this is the intentional quirk.
+    # Return premium as a comma-formatted string for large values,
+    # raw number for small values — inconsistent serialization.
     return {
         "quote_id": quote_id,
-        "premium": f"{premium:,.0f}",
+        "premium": f"{premium:,.0f}" if premium >= 1000 else premium,
         "limit": limit,
         "retention": retention,
     }

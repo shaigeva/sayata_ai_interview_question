@@ -97,6 +97,7 @@ find "$SKEL" -name "*.pyc" -delete 2>/dev/null || true
 # Build the zip
 cd "$SKEL"
 zip -q -r "$DELIVERY_DIR/skeleton.zip" .
+cd "$PROJECT_DIR"
 
 # Cleanup staging
 rm -rf "$SKEL"
@@ -109,6 +110,7 @@ mkdir -p "$SKEL_DOCS/docs"
 cp "$PROJECT_DIR/docs/about.md" "$SKEL_DOCS/docs/about.md"
 cd "$SKEL_DOCS"
 zip -q -r "$DELIVERY_DIR/skeleton-docs.zip" .
+cd "$PROJECT_DIR"
 rm -rf "$SKEL_DOCS"
 
 echo "  Created: delivery/skeleton-docs.zip"
@@ -197,6 +199,7 @@ cp "$PROJECT_DIR/tests/test_stub.py" "$STAGE/tests/test_stub.py"
 # Build the zip
 cd "$STAGE"
 zip -q -r "$DELIVERY_DIR/exercise.zip" .
+cd "$PROJECT_DIR"
 
 # Cleanup staging
 rm -rf "$STAGE"
@@ -217,6 +220,7 @@ done
 
 cd "$DOCS_STAGE"
 zip -q -r "$DELIVERY_DIR/docs.zip" .
+cd "$PROJECT_DIR"
 
 rm -rf "$DOCS_STAGE"
 

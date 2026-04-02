@@ -40,7 +40,7 @@ async def create_quote(body: dict):
     if limit not in SUPPORTED_LIMITS or retention not in SUPPORTED_RETENTIONS:
         return {
             "error": "invalid_data",
-            "message": "One or more of the provided values are not supported.",
+            "message": "Invalid data",
         }
 
     premium = _calculate_premium(

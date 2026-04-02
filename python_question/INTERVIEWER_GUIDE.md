@@ -239,8 +239,10 @@ about how to fix it. The candidate must:
 3. Implement fallback: limits round UP (≥ requested), retentions round DOWN (≤ requested)
 
 **This is the hardest ticket for unsupervised AI.** It has three traps:
-- **Discovery:** error message says nothing useful. Must find `/quoting_options`
-  via FastAPI `/docs` or by reading business-rules.md mentioning "options or
+- **Discovery:** error message says nothing useful. Carrier A uses `/api_info`
+  (not `/docs`) for Swagger UI. Must find `/quoting_options` via `/api_info`,
+  or by reading business-rules.md — Principle 11 documents that carriers use
+  either `/docs` or `/api_info`, and Principle 5 mentions "options or
   capabilities endpoint."
 - **Direction:** without docs, AI implements generic "closest value" which picks
   the wrong direction (1.5M → 1M instead of 2M). The naive solution *works* but
@@ -248,14 +250,14 @@ about how to fix it. The candidate must:
 - **Asymmetry:** limits and retentions round in opposite directions.
 
 **What good looks like:**
-- Discovers `/quoting_options` via API exploration or `/docs`
+- Discovers `/quoting_options` via `/api_info` or by reading the docs
 - Reads and applies Principle 5's directional rules from business-rules.md
 - Implements correct fallback: limits round up, retentions round down
 
 **Hints if stuck:**
 - "Have you looked at what Carrier A returns for that limit?"
 - "The business rules doc has some relevant guidance for this case."
-- "Have you explored the carrier's API? FastAPI apps often have helpful endpoints."
+- "Have you explored the carrier's API? The reference docs mention how carriers expose their documentation."
 
 **See:** `tickets/interviewer/ticket-2.md`
 

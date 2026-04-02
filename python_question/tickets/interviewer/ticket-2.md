@@ -35,8 +35,10 @@ The candidate needs to:
 
 **Trap 1 — Finding the options endpoint.** The error message just says
 "incompatible option" with no hint. The endpoint is `/quoting_options` (not
-`/options`). Candidate can discover it via FastAPI's `/docs` endpoint or by
-reading business-rules.md which mentions "options or capabilities endpoint."
+`/options`). Carrier A uses `/api_info` (not `/docs`) for Swagger UI.
+Candidate can discover it via `/api_info`, or by reading business-rules.md —
+Principle 11 documents `/docs` vs `/api_info`, and Principle 5 mentions
+"options or capabilities endpoint."
 
 **Trap 2 — Fallback direction.** Without the docs, an AI agent will implement
 generic "closest value" logic. For limit 1.5M with options [500K, 1M, 2M, 3M]:
@@ -51,7 +53,7 @@ This is the key test of doc extraction. The AI produces working but incorrect co
 
 ## What to Look For
 
-- Does the candidate discover `/quoting_options` via API exploration or `/docs`?
+- Does the candidate discover `/quoting_options` via `/api_info` or by reading the docs?
 - Do they read and apply the directional rules from business-rules.md?
 - Does the naive AI solution round the wrong direction? Does the candidate catch it?
 - Does the fallback logic mutate the submission object (breaking other carriers)?

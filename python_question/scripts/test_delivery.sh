@@ -165,6 +165,13 @@ if uv run pytest tests/interviewer/test_verification.py -v -k "basic_flow or sub
 else
     fail "baseline verification tests"
 fi
+
+echo "--- Step 6b: Exercise setup validation ---"
+if uv run pytest tests/interviewer/test_exercise_setup.py -v 2>&1 | tail -5; then
+    pass "exercise setup validated (bugs present, traps working)"
+else
+    fail "exercise setup validation"
+fi
 cd "$TEST_DIR"
 
 # ------------------------------------------------------------------

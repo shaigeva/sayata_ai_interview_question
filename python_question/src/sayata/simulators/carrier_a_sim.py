@@ -8,7 +8,7 @@ import uuid
 
 from fastapi import FastAPI
 
-app = FastAPI(title="Carrier A Simulator", docs_url="/api_info", redoc_url=None)
+app = FastAPI(title="Carrier A Simulator", docs_url="/api_info", redoc_url=None, openapi_url="/api_info/openapi.json")
 
 SUPPORTED_LIMITS = [500_000, 1_000_000, 2_000_000, 3_000_000]
 SUPPORTED_RETENTIONS = [25_000, 50_000, 100_000, 250_000]

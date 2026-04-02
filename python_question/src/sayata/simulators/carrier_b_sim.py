@@ -8,7 +8,7 @@ import uuid
 
 from fastapi import FastAPI
 
-app = FastAPI(title="Carrier B Simulator", docs_url="/api_info", redoc_url=None)
+app = FastAPI(title="Carrier B Simulator", docs_url="/api_info", redoc_url=None, openapi_url="/api_info/openapi.json")
 
 BASE_RATES = {
     "technology": 0.0016,

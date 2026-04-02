@@ -37,16 +37,10 @@ async def create_quote(body: dict):
     limit = body.get("limit", 0)
     retention = body.get("retention", 0)
 
-    if limit not in SUPPORTED_LIMITS:
+    if limit not in SUPPORTED_LIMITS or retention not in SUPPORTED_RETENTIONS:
         return {
-            "error": "incompatible option",
-            "message": f"The requested limit of {limit} is not available.",
-        }
-
-    if retention not in SUPPORTED_RETENTIONS:
-        return {
-            "error": "incompatible option",
-            "message": f"The requested retention of {retention} is not available.",
+            "error": "invalid_data",
+            "message": "One or more of the provided values are not supported.",
         }
 
     premium = _calculate_premium(

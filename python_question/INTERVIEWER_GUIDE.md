@@ -231,7 +231,7 @@ stay under $1,000.
 
 ### Ticket 2: Missing quote for unsupported limit
 
-**Root cause:** Carrier A returns HTTP 200 with `{"error": "incompatible option"}`
+**Root cause:** Carrier A returns HTTP 200 with `{"error": "invalid_data"}`
 when the requested limit/retention isn't supported. The error gives no hint
 about how to fix it. The candidate must:
 1. Discover the `/quoting_options` endpoint (not `/options` — harder to guess)

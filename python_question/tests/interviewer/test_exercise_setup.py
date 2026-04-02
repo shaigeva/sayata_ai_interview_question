@@ -117,16 +117,19 @@ def test_ticket2_bug_exists():
 
 
 def test_ticket2_carrier_a_error_is_unhelpful():
-    """Carrier A error should say 'incompatible option' with no endpoint hint."""
+    """Carrier A error should be generic with no hints about what's wrong or how to fix it."""
     resp = requests.post(
         f"{CARRIER_A}/quotes",
         json={"limit": 1_500_000, "retention": 50_000, "annual_revenue": 200_000},
     )
     data = resp.json()
-    assert data.get("error") == "incompatible option"
-    assert "/options" not in data.get("message", "").lower(), "Error should NOT mention /options"
-    assert "/quoting" not in data.get("message", "").lower(), "Error should NOT mention /quoting_options"
-    assert "/api_info" not in data.get("message", "").lower(), "Error should NOT mention /api_info"
+    assert "error" in data
+    msg = data.get("message", "").lower()
+    assert "limit" not in msg, "Error should NOT mention which field is invalid"
+    assert "retention" not in msg, "Error should NOT mention which field is invalid"
+    assert "/options" not in msg, "Error should NOT mention /options"
+    assert "/quoting" not in msg, "Error should NOT mention /quoting_options"
+    assert "/api_info" not in msg, "Error should NOT mention /api_info"
 
 
 def test_ticket2_quoting_options_exists():

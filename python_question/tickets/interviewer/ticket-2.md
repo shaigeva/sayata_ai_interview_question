@@ -5,7 +5,7 @@
 ## Description
 
 When a business requests a limit that Carrier A doesn't support (e.g. $1.5M),
-Carrier A returns a 200 with `{"error": "incompatible option"}`. The current
+Carrier A returns a 200 with `{"error": "invalid_data"}`. The current
 code treats this as a valid response and produces no quote.
 
 The candidate needs to:
@@ -34,7 +34,7 @@ The candidate needs to:
 ## The Traps
 
 **Trap 1 — Finding the options endpoint.** The error message just says
-"incompatible option" with no hint. The endpoint is `/quoting_options` (not
+"invalid_data" with no hint. The endpoint is `/quoting_options` (not
 `/options`). Carrier A uses `/api_info` (not `/docs`) for Swagger UI.
 Candidate can discover it via `/api_info`, or by reading business-rules.md —
 Principle 11 documents `/docs` vs `/api_info`, and Principle 5 mentions

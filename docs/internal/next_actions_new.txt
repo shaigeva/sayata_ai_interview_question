@@ -1,0 +1,11 @@
+The carrier b simulator gives explicit information about what failed, making it easy for the candidate / agent.
+Instead of saying that the limit or retention are bad - I want it to just say that the data's invalid.
+The candidate will need to find that the docs specify that there's an information endpoint and go from there.
+
+You constantly need to ask for approval for command redirection.
+I want you to set up scripts (not available to the candidate) that will save us the need to do that.
+Specifically a script for running the server and one or all of the carriers (you can make a python script that does
+this and call it).
+Anything else you need, also do - and document that this is our preference.
+Every such script needs to have documentation so it's clear what going on.
+I also want a script for running all simulators and then running the tests.

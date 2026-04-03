@@ -10,12 +10,20 @@
       "Bash(rm:*)",
       "Bash(uv run:*)",
       "Bash(uv:*)",
-      "Bash(rm Dockerfile:*)",
       "Bash(lsof:*)",
       "Bash(kill:*)",
       "Bash(xargs kill:*)",
       "Bash(find:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(curl:*)",
+      "Bash(BASE_PORT=9100 bash:*)"
     ]
+  },
+  "sandbox": {
+    "network": {
+      "allowedDomains": [
+        "localhost"
+      ]
+    }
   }
 }

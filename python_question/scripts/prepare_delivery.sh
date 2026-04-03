@@ -190,7 +190,7 @@ cp "$PROJECT_DIR/scripts/verify_setup.py" "$STAGE/scripts/verify_setup.py"
 cp "$PROJECT_DIR/setup.sh" "$STAGE/setup.sh"
 chmod +x "$STAGE/setup.sh"
 
-# Tests (stub only — NO test_verification.py)
+# Tests (stub only — NO test_candidate_results.py)
 mkdir -p "$STAGE/tests"
 cp "$PROJECT_DIR/tests/__init__.py" "$STAGE/tests/__init__.py"
 cp "$PROJECT_DIR/tests/conftest.py" "$STAGE/tests/conftest.py"

@@ -32,7 +32,8 @@ ai_interview_question/
 │   │   └── build_simulators.sh   # Compiles simulators to .pyc wheel
 │   ├── tests/
 │   │   ├── interviewer/
-│   │   │   └── test_verification.py  # 15 tests (never shipped to candidates)
+│   │   │   ├── test_exercise_setup.py    # Validates bugs are present (never shipped)
+│   │   │   └── test_candidate_results.py # 19 tests, given AFTER interview (not in any zip)
 │   │   ├── test_setup.py         # Skeleton tests (shipped in skeleton.zip)
 │   │   ├── test_stub.py          # Exercise stub tests (shipped in exercise.zip)
 │   │   └── conftest.py
@@ -46,6 +47,8 @@ ai_interview_question/
 │   │   ├── architecture.md       # NOT shipped — interviewer reference only
 │   │   └── about.md              # Shipped in skeleton-docs.zip
 │   ├── packages/                 # Built wheel goes here
+│   ├── solutions/                # Reference solution (gitignored, not shipped)
+│   │   └── src/sayata/           # Fixed server.py, models.py, all 4 carriers
 │   ├── delivery/                 # Generated zips (gitignored)
 │   ├── README.md                 # Exercise README (shipped)
 │   ├── README_PREP.md            # Skeleton README (shipped)
@@ -73,13 +76,13 @@ cd python_question
 # Full delivery pipeline test (16 checks, uses BASE_PORT=9100)
 bash scripts/test_delivery.sh
 
-# Interviewer baseline tests against dev servers
+# Baseline tests against dev servers
 uv run python scripts/start.py &
 sleep 3
-uv run pytest tests/interviewer/test_verification.py -v -k "basic_flow or submission_not_found or low_revenue"
+uv run pytest tests/interviewer/test_candidate_results.py -v -k "TestBaseline"
 
-# All interviewer tests (requires all tickets to be solved)
-uv run pytest tests/interviewer/test_verification.py -v
+# All tests (requires all tickets to be solved)
+uv run pytest tests/interviewer/test_candidate_results.py -v
 
 # After ANY simulator change, rebuild the wheel:
 bash scripts/build_simulators.sh

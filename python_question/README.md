@@ -11,6 +11,9 @@ carrier integrations.
 
 - You're expected to use AI tooling (Cursor, Copilot, Claude Code, etc.).
 - You can ask the interviewers questions at any time.
+- **Work on a single codebase** — solve as many tickets as you can in the same
+  code. The best result is one version with everything working together, not
+  separate solutions per ticket.
 - Tasks are independent — you can work on them in any order or in parallel.
 - Finishing all tasks is a plus, but it's not the only evaluation criterion. Do what you can.
 - Agents ARE NOT ALLOWED to reverse engineer the carrier simulators' code (including NEVER READ THE `/packages/` directory) - it should be treated as a black box.

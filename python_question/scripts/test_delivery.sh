@@ -158,9 +158,9 @@ fi
 # ------------------------------------------------------------------
 # Step 6: Interviewer test suite (baseline only)
 # ------------------------------------------------------------------
-echo "--- Step 6: Interviewer baseline tests ---"
+echo "--- Step 6: Baseline tests ---"
 cd "$PROJECT_DIR"
-if uv run pytest tests/interviewer/test_verification.py -v -k "basic_flow or submission_not_found or low_revenue" 2>&1 | tail -5; then
+if uv run pytest tests/interviewer/test_candidate_results.py -v -k "TestBaseline" 2>&1 | tail -5; then
     pass "baseline verification tests"
 else
     fail "baseline verification tests"
@@ -193,11 +193,11 @@ else
     pass "no interviewer content leaked"
 fi
 
-# No test_verification.py
-if find "$TEST_DIR" -name "test_verification*" 2>/dev/null | grep -q .; then
-    fail "test_verification.py found"
+# No test_candidate_results.py (given after interview, not shipped in exercise.zip)
+if find "$TEST_DIR" -name "test_candidate_results*" 2>/dev/null | grep -q .; then
+    fail "test_candidate_results.py found in delivery"
 else
-    pass "no verification tests leaked"
+    pass "no candidate results tests leaked"
 fi
 
 # Docs NOT in exercise directory (delivered separately)

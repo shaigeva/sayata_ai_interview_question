@@ -23,6 +23,8 @@ The four tasks escalate in difficulty:
 | Ticket 4 | Integration | Hard | Unfamiliar API + field mapping |
 
 Completing all 4 is not expected. 2–3 tasks in 60–90 minutes is a strong result.
+The best outcome is a **single version of the code** with as many tickets
+solved as possible — not separate solutions per ticket.
 
 ---
 
@@ -132,9 +134,13 @@ candidate (copy-paste):
 > 2. **docs.zip** — this contains reference documentation (business rules,
 >    glossary, etc.). Save it wherever is convenient for you.
 >
-> Once setup is done, start the servers:
+> Once setup is done, start the servers (each in its own terminal):
 > ```
-> uv run python scripts/start.py
+> uv run python scripts/start_server.py                    # your server
+> uv run python scripts/start_carrier.py carrier_a          # Carrier A
+> uv run python scripts/start_carrier.py carrier_b          # Carrier B
+> uv run python scripts/start_carrier.py carrier_c          # Carrier C
+> uv run python scripts/start_carrier.py carrier_d          # Carrier D
 > ```
 >
 > Open `README.md` for the full instructions and tasks.
@@ -164,8 +170,8 @@ After extracting, the candidate should confirm:
      `src/sayata/server_stub.py` (original stub)
    - `tickets/` directory with `ticket-1.md` through `ticket-4.md`
 
-3. **Servers start and respond** — after running `uv run python scripts/start.py`,
-   in a second terminal:
+3. **Servers start and respond** — after starting all servers, in another
+   terminal:
    ```
    uv run python scripts/verify_setup.py
    ```
@@ -366,7 +372,7 @@ Candidates can extend this file or create new test files.
 ### Layer 2: Candidate verification script (`scripts/verify_setup.py`)
 
 **Audience:** Candidate
-**Requires:** All servers running (`uv run python scripts/start.py`)
+**Requires:** All servers running
 
 ```bash
 uv run python scripts/verify_setup.py
@@ -376,53 +382,60 @@ A non-pytest script that sends a basic submission to the running server and
 prints the results. Also pings all four carrier simulators to confirm they're
 running. Gives candidates quick visual feedback without needing to write tests.
 
-### Layer 3: Interviewer test suite (`tests/interviewer/test_verification.py`)
+### Layer 3: Results test suite (`tests/interviewer/test_candidate_results.py`)
 
-**Audience:** Interviewer only (never shipped to candidates)
+**Audience:** Interviewer (can optionally be given to candidate after they
+finish to show results — never shipped in any zip)
 **Requires:** All servers running, candidate's code in place
 
 ```bash
-uv run pytest tests/interviewer/test_verification.py -v
+uv run pytest tests/interviewer/test_candidate_results.py -v
 ```
 
-Full pytest suite with 14 tests covering every task. Run this from **this
-repo** (not the candidate's repo) against the candidate's running servers.
-The tests hit the same server the candidate is running.
+Pytest suite with 19 tests grouped by ticket using test classes (`TestBaseline`,
+`TestTicket1`, `TestTicket2`, etc.). The `pytest -v` output clearly shows which
+tickets the candidate solved. Tests are self-documenting with clear names — no
+root-cause hints.
 
-#### Test breakdown by ticket
-
-| Test | Ticket | What it verifies |
-|------|--------|-----------------|
-| `test_basic_flow` | Baseline | Low-revenue submit → 2 quotes → bind |
-| `test_submission_not_found` | Baseline | 404 for nonexistent submission |
-| `test_low_revenue_both_carriers` | Baseline | Both A and B return quotes |
-| `test_ticket1_high_value_policy` | 1 | $5M revenue → quotes from both A and B |
-| `test_ticket1_premium_is_numeric` | 1 | Carrier B premium is a number, not string |
-| `test_ticket2_high_limit_request` | 2 | Unsupported limit → quotes from both A and B |
-| `test_ticket2_uses_closest_limit` | 2 | Carrier A falls back to closest limit (3M for 5M) |
-| `test_ticket2_unsupported_retention` | 2 | Carrier A falls back to closest retention |
-| `test_ticket3_carrier_c_present` | 3 | Carrier C quote appears (after polling delay) |
-| `test_ticket3_carrier_c_quote_fields` | 3 | Carrier C quote has all standard fields |
-| `test_ticket4_carrier_d_present` | 4 | Carrier D quote appears |
-| `test_ticket4_carrier_d_quote_normalized` | 4 | Carrier D quote normalized to standard format |
-| `test_ticket4_carrier_d_bind` | 4 | Carrier D quote can be bound |
-| `test_all_carriers_combined` | All | Standard submission returns all 4 carriers |
-
-The baseline tests should pass with the unmodified skeleton. Ticket-specific
-tests fail until the candidate fixes/implements that task.
+The baseline tests (`TestBaseline`) pass with the unmodified skeleton.
+Ticket-specific tests fail until the candidate fixes/implements that task.
 
 Tests for tickets 3 and 4 include `time.sleep()` calls (up to 10 seconds) to
 wait for async polling to complete. The full suite takes ~35 seconds to run.
+
+#### Test breakdown by ticket
+
+| Class | Test | What it verifies |
+|-------|------|-----------------|
+| `TestBaseline` | `test_health` | Server health endpoint responds |
+| `TestBaseline` | `test_submit_and_get` | Can create and retrieve a submission |
+| `TestBaseline` | `test_low_revenue_returns_two_quotes` | Both A and B return quotes |
+| `TestBaseline` | `test_bind_quote` | Can bind a quote |
+| `TestBaseline` | `test_submission_not_found` | 404 for nonexistent submission |
+| `TestTicket1` | `test_high_revenue_both_carriers` | $5M revenue → both A and B |
+| `TestTicket1` | `test_premium_is_integer` | All premiums are integers |
+| `TestTicket1` | `test_low_revenue_still_works` | Regression check |
+| `TestTicket2` | `test_unsupported_limit_returns_quote` | Unsupported limit → Carrier A quote |
+| `TestTicket2` | `test_limit_fallback_rounds_up` | 1.5M → 2M (nearest >=) |
+| `TestTicket2` | `test_limit_above_max_uses_highest` | 5M → 3M (highest available) |
+| `TestTicket2` | `test_retention_fallback_rounds_down` | 75K → 50K (nearest <=) |
+| `TestTicket2` | `test_high_limit_both_carriers` | Both carriers return for $5M limit |
+| `TestTicket3` | `test_carrier_c_returns_quote` | Carrier C quote appears |
+| `TestTicket3` | `test_carrier_c_quote_has_standard_fields` | All fields present |
+| `TestTicket4` | `test_carrier_d_returns_quote` | Carrier D quote appears |
+| `TestTicket4` | `test_carrier_d_quote_normalized` | Normalized to standard format |
+| `TestTicket4` | `test_carrier_d_bind` | Carrier D bind works |
+| `TestAllTickets` | `test_all_four_carriers` | All 4 carriers in one submission |
 
 #### Running a subset
 
 To check a specific ticket:
 
 ```bash
-uv run pytest tests/interviewer/test_verification.py -v -k "ticket1"
-uv run pytest tests/interviewer/test_verification.py -v -k "ticket2"
-uv run pytest tests/interviewer/test_verification.py -v -k "ticket3"
-uv run pytest tests/interviewer/test_verification.py -v -k "ticket4"
+uv run pytest tests/interviewer/test_candidate_results.py -v -k "TestTicket1"
+uv run pytest tests/interviewer/test_candidate_results.py -v -k "TestTicket2"
+uv run pytest tests/interviewer/test_candidate_results.py -v -k "TestTicket3"
+uv run pytest tests/interviewer/test_candidate_results.py -v -k "TestTicket4"
 ```
 
 ### Pre-interview: testing the delivery artifacts
@@ -445,6 +458,34 @@ session on the standard 8000 range.
 ---
 
 ## 7. After the Interview
+
+### Evaluating with the test suite
+
+Once the candidate has finished working, give them the test file
+`tests/interviewer/test_candidate_results.py` and ask them to run it:
+
+```bash
+uv run pytest tests/interviewer/test_candidate_results.py -v
+```
+
+This file is **not shipped** in exercise.zip — it's given after the candidate
+finishes. Tests are grouped by ticket, so you can immediately see which tickets
+the candidate solved and how completely. The best result is a **single version
+of the code** with as many tickets working as possible.
+
+> **Copy-paste for the candidate:**
+>
+> Here's a test file to check your work. Drop it in your `tests/` directory
+> and run it:
+> ```
+> uv run pytest tests/interviewer/test_candidate_results.py -v
+> ```
+> It tests each ticket separately — you'll see which ones are passing.
+
+Note: Ticket 3 tests include `time.sleep(10)` to wait for async polling, so
+the full suite takes ~35 seconds.
+
+### Collecting the solution
 
 If you want to review the candidate's code later, ask them to zip their
 solution:
@@ -469,20 +510,20 @@ using exactly 3.12 (`python3 --version`). Run `uv python install 3.12` if needed
 
 **Q: Servers won't start (port already in use).**
 A: Kill existing processes: `lsof -ti :8000-8004 | xargs kill`. Or use a
-different port range: `BASE_PORT=9000 uv run python scripts/start.py`.
+different port range: `BASE_PORT=9000 bash scripts/run_tests.sh`.
 
 **Q: Running parallel interview sessions on the same machine.**
 A: All scripts support the `BASE_PORT` environment variable. Set different
 ranges for each session:
 ```bash
-# Session 1 (default)
+# Session 1 (default — interviewers use start.py from this repo)
 uv run python scripts/start.py
 
 # Session 2
 BASE_PORT=9000 uv run python scripts/start.py
 
 # Interviewer tests against session 2
-BASE_PORT=9000 uv run pytest tests/interviewer/test_verification.py -v
+BASE_PORT=9000 uv run pytest tests/interviewer/test_candidate_results.py -v
 ```
 
 **Q: Candidate asks about the simulators — can they see the source?**

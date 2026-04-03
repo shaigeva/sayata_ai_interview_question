@@ -82,5 +82,5 @@ else
     uv run pytest tests/interviewer/test_exercise_setup.py -v
     echo ""
     echo "=== Baseline verification ==="
-    uv run pytest tests/interviewer/test_verification.py -v -k "basic_flow or submission_not_found or low_revenue"
+    uv run pytest tests/interviewer/test_candidate_results.py -v -k "TestBaseline"
 fi
